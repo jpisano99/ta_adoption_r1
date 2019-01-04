@@ -1,0 +1,35 @@
+from Ssheet_class import Ssheet
+from settings import app
+#
+# Create a dict called sku_dict from the ta_skus smartsheet
+#
+
+
+def build_sku_dict():
+    # Create an object from SmartSheets
+    skus = app['SS_SKU']
+    my_skus = Ssheet(skus)
+
+    sku_dict = {}
+
+    for row in my_skus.rows:
+        sku = ''
+        sku_type = ''
+        sku_desc = ''
+        x = 0
+        for row_data in row['cells']:
+            x += 1
+            if x == 1:
+                sku = row_data['value']
+            elif x == 2:
+                sku_type = row_data['value']
+            elif x == 3:
+                sku_desc = row_data['value']
+
+        sku_dict[sku] = [sku_type, sku_desc]
+
+    #
+    # the sku_dict is now created !!!
+    #
+
+    return sku_dict
