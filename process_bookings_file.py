@@ -4,12 +4,9 @@ from build_coverage_dict import *
 from build_sku_dict import *
 from build_bookings_dict import *
 from build_renewals_dict import *
-from scrub_orders import *
+from cleanup_orders import *
 from find_team import *
 # from push_list_to_ss import *
-
-
-
 
 
 #
@@ -24,7 +21,6 @@ path_to_renewals = path_to_files + renewals_file
 path_to_bookings = path_to_files + bookings_file
 
 
-
 # Go to Smartsheets and build these two dicts to use reference lookups
 # team_dict: {'sales_levels 1-6':[('PSS','TSA')]}
 # sku_dict: {sku : [sku_type, sku_description]}
@@ -32,7 +28,7 @@ team_dict = build_coverage_dict()
 sku_dict = build_sku_dict()
 
 #
-# Open up the renewals and bookings workbooks
+# Open up the renewals and bookings excel workbooks
 #
 wb_renewals = xlrd.open_workbook(path_to_renewals)
 sheet_renewals = wb_renewals.sheet_by_index(0)
@@ -52,23 +48,22 @@ bookings_dict = build_bookings_dict(path_to_bookings,sheet_bookings)
 #
 # init a bunch a variable we need for the main loop
 #
-master_dict = {}
 customer_list = []
-csv_top_row = []
-csv_rows = []
-csv_row = []
+order_top_row = []
+order_rows = []
+order_row = []
 sku_col_num = -1
 col_pss_num = -1
 col_tsa_num = -1
 
-# Build the column titles top row \
+# Build the column titles top row
 # Also grab
 # 1. sku column number
 # 2. PSS and TSA column numbers
 for idx, val in enumerate(bookings_dict['col_info']):
     col_name = val[0]
     col_num = val[1]
-    csv_top_row.append(val[0])
+    order_top_row.append(val[0])
     if col_name == 'Bundle Product ID':
         sku_col_num = col_num
     if col_name == 'PSS':
@@ -76,27 +71,27 @@ for idx, val in enumerate(bookings_dict['col_info']):
     if col_name == 'TSA':
         col_tsa_num = idx
 
-csv_row = csv_top_row
-csv_rows.append(csv_row)
+order_row = order_top_row
+order_rows.append(order_row)
 
 #
-# Main loop of bookings data
+# Main loop of bookings excel data
 #
 for i in range(sheet_bookings.nrows):
 
-    # SKU of interest ?
+    # Is this SKU of interest ?
     sku = sheet_bookings.cell_value(i,sku_col_num)
 
     if sku in sku_dict :
         # Let's make a row for this order
         # Since it has an "interesting" sku
-        csv_row = []
+        order_row = []
         sales_level = ''
         sales_level_cntr = 0
         sku_desc = sku_dict[sku][1]
 
-        # Loop across the bookings_dict
-        # to build this output row
+        # Walk across the bookings_dict columns
+        # to build this output row cell by cell
         for val in bookings_dict['col_info']:
             col_name = val[0]
             col_idx = val[1]
@@ -107,74 +102,80 @@ for i in range(sheet_bookings.nrows):
             if col_name == 'End Customer Global Ultimate Name':
                 customer_name_end = sheet_bookings.cell_value(i, col_idx)
 
-            # Lookup the PSS/TSA team for this order
+            # If this is a 'Sales Level X' column then
+            # Capture it's value for lookup
             if col_name[:-2] == 'Sales Level':
                 sales_level = sales_level + sheet_bookings.cell_value(i, col_idx) +','
                 sales_level_cntr += 1
                 if sales_level_cntr == 6:
+                    # We have collected all 6 sales levels
+                    # Now go to find_team to do the lookup
                     sales_level = sales_level[:-1]
                     sales_team = find_team(team_dict,sales_level)
                     pss = sales_team[0]
                     tsa = sales_team[1]
-                    csv_row[col_pss_num] = pss
-                    csv_row[col_tsa_num] = tsa
+                    order_row[col_pss_num] = pss
+                    order_row[col_tsa_num] = tsa
 
             if col_idx != -1:
-                csv_row.append(sheet_bookings.cell_value(i, col_idx))
+                # OK we have a cell we need so grab it
+                order_row.append(sheet_bookings.cell_value(i, col_idx))
             elif col_name == 'Product Description':
                 # Add in the Product Description
-                csv_row.append(sku_desc)
+                order_row.append(sku_desc)
             elif col_name == 'Renewal Date(s)':
                 # Add in the Renewal Date if there is one
+                # Else just add a blank string
                 if customer_name_erp in renewals_dict:
                     renewal_date = renewals_dict[customer_name_erp]
-                    csv_row.append(renewal_date[0])
+                    order_row.append(renewal_date[0])
                 else:
-                    csv_row.append('')
-
+                    order_row.append('')
             else:
-                csv_row.append('')
+                # this cell is assigned a -1 in the bookings_dict
+                # so assign a blank as a placeholder for now
+                order_row.append('')
 
-        # Done with this row
-        # Log this row and
+        # Done with all the columns in this row
+        # Log this row for BOTH customer names and orders
         # Go to next row of the raw bookings data
-        # customer_list.append(customer_name_erp)
         customer_list.append((customer_name_erp, customer_name_end))
-        csv_rows.append(csv_row)
+        order_rows.append(order_row)
 
 #
 # End
 #
 
-# OK we now have a full list (csv_rows) of just the SKUs we are interested in
+# OK we now have a full list (order_rows) of just the SKUs we are interested in
 # As determined by the sku_dict
 
 # Now we build a Customer Summary/Detail
-# master_dict: {cust_name:[[order1],[order2],[orderN]]}
+# order_dict: {cust_name:[[order1],[order2],[orderN]]}
 
 # Let's organize and summarize
+order_dict = {}
 orders = []
 order = []
 x = 0
-for csv_row in csv_rows:
-    customer = csv_row[0]
+for order_row in order_rows:
+    customer = order_row[0]
     if x==0:
         x += 1
         continue
 
     # Is this in the master dict ?
-    if customer in master_dict:
+    if customer in order_dict:
         orders = []
-        for order in master_dict[customer]:
+        for order in order_dict[customer]:
             orders.append(order)
 
-        orders.append(csv_row)
-        master_dict[customer] = orders
+        orders.append(order_row)
+        order_dict[customer] = orders
 
     else:
         orders = []
-        orders.append(csv_row)
-        master_dict[customer]=orders
+        orders.append(order_row)
+        order_dict[customer]=orders
 
 
 # we now create a simple customer_list list
@@ -195,26 +196,26 @@ print('We have: ', len(customer_list), ' customers')
 # Clean up orders to remove:
 # 1.  +/- zero sum orders
 # 2. zero revenue orders
-master_dict = scrub_orders(customer_list,master_dict,csv_top_row)
+order_dict = cleanup_orders(customer_list,order_dict,order_top_row)
 
-# Create a csv file out of the master_dict
-scrubbed_csv_rows=[]
-scrubbed_csv_rows.append(csv_top_row)
-for key,val in master_dict.items():
+# Create a order file out of the order_dict
+summary_order_rows=[]
+summary_order_rows.append(order_top_row)
+for key,val in order_dict.items():
     for my_row in val:
-        scrubbed_csv_rows.append(my_row)
+        summary_order_rows.append(my_row)
 
 #
-# Write the CSV file
+# Write the order file
 #
-# print(csv_rows)
+# print(order_rows)
 # print(customer_list)
 
 
-workbook = xlsxwriter.Workbook(path_to_files + 'scrubbed' + app['AS_OF_DATE'] + '.xlsx')
+workbook = xlsxwriter.Workbook(path_to_files + 'TA Order Summary' + app['AS_OF_DATE'] + '.xlsx')
 worksheet = workbook.add_worksheet()
 
-for this_row, my_val in enumerate(scrubbed_csv_rows):
+for this_row, my_val in enumerate(summary_order_rows):
     worksheet.write_row(this_row, 0, my_val)
 
 workbook.close()
@@ -222,10 +223,10 @@ workbook.close()
 #
 #
 #
-workbook = xlsxwriter.Workbook(path_to_files + 'master' + app['AS_OF_DATE']  + '.xlsx')
+workbook = xlsxwriter.Workbook(path_to_files + 'TA Order Details' + app['AS_OF_DATE']  + '.xlsx')
 worksheet = workbook.add_worksheet()
 
-for this_row, my_val in enumerate(csv_rows):
+for this_row, my_val in enumerate(order_rows):
     worksheet.write_row(this_row, 0, my_val)
 
 workbook.close()
