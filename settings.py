@@ -34,7 +34,7 @@ app = dict(
     SS_COVERAGE='Tetration Coverage Map',
     SS_SKU='Tetration SKUs',
     SS_CUSTOMERS = 'Tetration Customer Names',
-    SS_MASTER = 'TA Unified Adoption Planner',
+    SS_DASHBOARD = 'TA Unified Adoption Dashboard',
     SS_WORKSPACE = 'Tetration Customer Adoption Workspace',
     AS_OF_DATE = datetime.now().strftime('_as_of_%m_%d_%Y')
 )
