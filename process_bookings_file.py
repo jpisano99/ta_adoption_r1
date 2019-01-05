@@ -1,12 +1,13 @@
 from settings import *
 import xlsxwriter
+import smartsheet
 from build_coverage_dict import *
 from build_sku_dict import *
 from build_bookings_dict import *
 from build_renewals_dict import *
 from cleanup_orders import *
 from find_team import *
-# from push_list_to_ss import *
+from push_xls_to_ss import *
 
 
 #
@@ -207,47 +208,36 @@ for key,val in order_dict.items():
 # Write the Summary order Excel File
 # Includes only those "Interesting" SKU's that are non-zero sum
 #
-workbook = xlsxwriter.Workbook(path_to_files + app['XLS_ORDER_SUMMARY'] + app['AS_OF_DATE'] + '.xlsx')
+wb_file = path_to_files + app['XLS_ORDER_SUMMARY'] + app['AS_OF_DATE'] + '.xlsx'
+workbook = xlsxwriter.Workbook(wb_file)
 worksheet = workbook.add_worksheet()
 for this_row, my_val in enumerate(summary_order_rows):
     worksheet.write_row(this_row, 0, my_val)
 workbook.close()
+push_xls_to_ss(wb_file, app['XLS_ORDER_SUMMARY'])
 
 #
 # Write the Detailed order Excel File
 # Includes ALL "Interesting" SKU's
 #
-workbook = xlsxwriter.Workbook(path_to_files + app['XLS_ORDER_DETAIL'] + app['AS_OF_DATE']  + '.xlsx')
+wb_file = path_to_files + app['XLS_ORDER_DETAIL'] + app['AS_OF_DATE']  + '.xlsx'
+workbook = xlsxwriter.Workbook(wb_file)
 worksheet = workbook.add_worksheet()
 for this_row, my_val in enumerate(order_rows):
     worksheet.write_row(this_row, 0, my_val)
 workbook.close()
+push_xls_to_ss(wb_file, app['XLS_ORDER_DETAIL'])
 
 #
-# Push TA Customer List to a local excel workbook
+# Write TA Customer List to a local excel workbook
 #
-workbook = xlsxwriter.Workbook(path_to_files + app['XLS_CUSTOMER'] + app['AS_OF_DATE']  + '.xlsx')
+wb_file = path_to_files + app['XLS_CUSTOMER'] + app['AS_OF_DATE']  + '.xlsx'
+workbook = xlsxwriter.Workbook(wb_file)
 worksheet = workbook.add_worksheet()
 for this_row, my_val in enumerate(customer_list):
     worksheet.write(this_row, 0, my_val[0])
     worksheet.write(this_row, 1, my_val[1])
 workbook.close()
+push_xls_to_ss(wb_file, app['XLS_CUSTOMER'])
 
 exit()
-
-#
-# Push Unique Customer List to SmartSheets
-#
-ss_rows = []
-for my_row in customer_list:
-    ss_rows.append(list(my_row))
-
-# Set the SmartSheet Column names
-ss_cols = [{'primary': True, 'title': 'ERP Customer Name', 'type': 'TEXT_NUMBER'},
-            {'title': 'End Customer Ultimate Name', 'type': 'TEXT_NUMBER'}]
-
-# This first row MUST have the column names
-ss_rows.insert(0, ['ERP Customer Name','End Customer Ultimate Name'])
-push_list_to_ss('Unique TA Customer Names',ss_cols, ss_rows)
-
-
