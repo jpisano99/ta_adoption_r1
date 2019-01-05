@@ -1,62 +1,57 @@
-import csv
+from settings import *
 import xlsxwriter
-import xlrd
 from build_coverage_dict import *
 from build_sku_dict import *
 from build_bookings_dict import *
 from build_renewals_dict import *
-# from scrub_orders import *
-# from find_team import *
+from scrub_orders import *
+from find_team import *
 # from push_list_to_ss import *
-from settings import *
 
-#
-# Process the latest Bookings File
-#
 
-# Loop over the bookings
-#
-#
+
 
 
 #
-# Bookings File Details, Master bookings has 9958 rows as of 12-15-18
+# Get settings for file locations and names
 #
-
 home = app['HOME']
 working_dir = app['WORKING_DIR']
-bookings_file = app['BOOKINGS']
+bookings_file = app['BOOKINGS'] # Master bookings has 9958 rows as of 12-15-18
 renewals_file = app['RENEWALS']
 path_to_files = home +'\\' + working_dir  + '\\'
-
-
 path_to_renewals = path_to_files + renewals_file
 path_to_bookings = path_to_files + bookings_file
 
+
+
+# Go to Smartsheets and build these two dicts to use reference lookups
+# team_dict: {'sales_levels 1-6':[('PSS','TSA')]}
+# sku_dict: {sku : [sku_type, sku_description]}
+team_dict = build_coverage_dict()
+sku_dict = build_sku_dict()
+
+#
+# Open up the renewals and bookings workbooks
+#
 wb_renewals = xlrd.open_workbook(path_to_renewals)
 sheet_renewals = wb_renewals.sheet_by_index(0)
 
 wb_bookings = xlrd.open_workbook(path_to_bookings)
 sheet_bookings = wb_bookings.sheet_by_index(0)
 
-# From the renewals file get renewal dates
+# From the renewals file get renewal dates for lookup
 # {erp_customer_name:[renewal_date,monthly_charge]}
-renewals_dict = build_renewals_dict(path_to_renewals,wb_renewals,sheet_renewals)
+renewals_dict = build_renewals_dict(wb_renewals,sheet_renewals)
 
-# From the current up to date bookings file build this dict
-bookings_dict = build_bookings_dict(path_to_bookings,wb_bookings,sheet_bookings)
+# From the current up to date bookings file build a simple dict
+# that describes the format of the output file we are creating
+# and the columns we need to add (ie PSS, TSA, Renewal Dates)
+bookings_dict = build_bookings_dict(path_to_bookings,sheet_bookings)
 
-# From Smartsheets build these two dicts
-team_dict = build_coverage_dict()
-sku_dict = build_sku_dict()
-
-print(renewals_dict)
-print(team_dict)
-print(sku_dict)
-print(bookings_dict)
-exit()
-
-
+#
+# init a bunch a variable we need for the main loop
+#
 master_dict = {}
 customer_list = []
 csv_top_row = []
@@ -66,7 +61,7 @@ sku_col_num = -1
 col_pss_num = -1
 col_tsa_num = -1
 
-# Build the column titles row \
+# Build the column titles top row \
 # Also grab
 # 1. sku column number
 # 2. PSS and TSA column numbers
@@ -87,10 +82,10 @@ csv_rows.append(csv_row)
 #
 # Main loop of bookings data
 #
-for i in range(sheet.nrows):
+for i in range(sheet_bookings.nrows):
 
     # SKU of interest ?
-    sku = sheet.cell_value(i,sku_col_num)
+    sku = sheet_bookings.cell_value(i,sku_col_num)
 
     if sku in sku_dict :
         # Let's make a row for this order
@@ -108,13 +103,13 @@ for i in range(sheet.nrows):
 
             # Capture both of the Customer names
             if col_name == 'ERP End Customer Name':
-                customer_name_erp = sheet.cell_value(i, col_idx)
+                customer_name_erp = sheet_bookings.cell_value(i, col_idx)
             if col_name == 'End Customer Global Ultimate Name':
-                customer_name_end = sheet.cell_value(i, col_idx)
+                customer_name_end = sheet_bookings.cell_value(i, col_idx)
 
             # Lookup the PSS/TSA team for this order
             if col_name[:-2] == 'Sales Level':
-                sales_level = sales_level + sheet.cell_value(i, col_idx) +','
+                sales_level = sales_level + sheet_bookings.cell_value(i, col_idx) +','
                 sales_level_cntr += 1
                 if sales_level_cntr == 6:
                     sales_level = sales_level[:-1]
@@ -125,7 +120,7 @@ for i in range(sheet.nrows):
                     csv_row[col_tsa_num] = tsa
 
             if col_idx != -1:
-                csv_row.append(sheet.cell_value(i, col_idx))
+                csv_row.append(sheet_bookings.cell_value(i, col_idx))
             elif col_name == 'Product Description':
                 # Add in the Product Description
                 csv_row.append(sku_desc)
@@ -216,12 +211,7 @@ for key,val in master_dict.items():
 # print(customer_list)
 
 
-# with open('scrubbed.csv', mode='w', newline='') as scrubbed_file:
-#     my_writer = csv.writer(scrubbed_file, delimiter=',',
-#                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-#     my_writer.writerows(scrubbed_csv_rows)
-
-workbook = xlsxwriter.Workbook('scrubbed.xlsx')
+workbook = xlsxwriter.Workbook(path_to_files + 'scrubbed' + app['AS_OF_DATE'] + '.xlsx')
 worksheet = workbook.add_worksheet()
 
 for this_row, my_val in enumerate(scrubbed_csv_rows):
@@ -229,14 +219,10 @@ for this_row, my_val in enumerate(scrubbed_csv_rows):
 
 workbook.close()
 
-
-
-# with open('master.csv', mode='w', newline='') as coverage_file:
-#     my_writer = csv.writer(coverage_file, delimiter=',',
-#                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-#     my_writer.writerows(csv_rows)
-
-workbook = xlsxwriter.Workbook('master.xlsx')
+#
+#
+#
+workbook = xlsxwriter.Workbook(path_to_files + 'master' + app['AS_OF_DATE']  + '.xlsx')
 worksheet = workbook.add_worksheet()
 
 for this_row, my_val in enumerate(csv_rows):
@@ -244,13 +230,7 @@ for this_row, my_val in enumerate(csv_rows):
 
 workbook.close()
 
-
-# Used for MULTIPLE columns
-
-# with open('unique_customers.csv', mode='w', newline='') as customer_file:
-#     my_writer = csv.writer(customer_file, delimiter=',',
-#                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-#     my_writer.writerows(customer_list)
+exit()
 
 #
 # Push Unique Customer List to SmartSheets
@@ -279,13 +259,6 @@ for this_row, my_val in enumerate(customer_list):
     worksheet.write(this_row, 1, my_val[1])
 
 workbook.close()
-
-
-# Used for SINGLE columns
-# with open('unique_customers.csv', mode='w', newline='') as customer_file:
-#     my_writer = csv.writer(customer_file,delimiter='\n',
-#                            quotechar='"', quoting=csv.QUOTE_ALL)
-#     my_writer.writerow(customer_list)
 
 
 exit()

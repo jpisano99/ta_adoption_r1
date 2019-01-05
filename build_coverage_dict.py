@@ -5,7 +5,6 @@ from settings import app
 # Create a dict called team_dict from the coverage smartsheet
 #
 
-
 def build_coverage_dict():
     # Create an object from SmartSheets
     coverage = app['SS_COVERAGE']
@@ -35,16 +34,10 @@ def build_coverage_dict():
             key = '*'
         key = key.rstrip(',')
 
-        # print(pss, tsa)
-        # print(key)
-
         # # Create a Dict of sales_levels with a List of team(s) covering each territory
         info = team_dict.get(key, [])
         info.append((pss, tsa))
         team_dict[key] = info
-
-    # print(team_dict)
-    # print(json.dumps(team_dict, indent=2))
 
     #
     # the team_dict is now created !!!

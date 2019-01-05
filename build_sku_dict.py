@@ -1,10 +1,9 @@
 from Ssheet_class import Ssheet
 from settings import app
+
 #
 # Create a dict called sku_dict from the ta_skus smartsheet
 #
-
-
 def build_sku_dict():
     # Create an object from SmartSheets
     skus = app['SS_SKU']

@@ -2,7 +2,7 @@ import time
 import datetime, xlrd
 
 
-def build_renewals_dict(path_to_bookings, wb, sheet):
+def build_renewals_dict(wb, sheet):
     # Return a dict (my_dict) with bookings file info
 
     my_list = ['End Customer', 'Renewal Date', 'Monthly Charge']

@@ -1,4 +1,8 @@
-def build_bookings_dict(path_to_bookings, wb, sheet):
+#
+# This takes the .xls bookings sheet
+#
+
+def build_bookings_dict(path_to_bookings, sheet):
     # Return a dict (my_dict) with bookings file info
 
     my_dict = {'pathname' : path_to_bookings,
@@ -32,14 +36,5 @@ def build_bookings_dict(path_to_bookings, wb, sheet):
             if col_name == sheet.cell_value(0, bookings_col_num):
                 my_dict['col_info'][idx][1] = bookings_col_num
 
-    # for idx, val in enumerate(my_dict['col_info']):
-    #     if val[1] == -1:
-    #         print ('Column: ' + val[0] + ' NOT found !')
-    #         exit()
-
     return my_dict
 
-# For testing
-if __name__ == '__main__':
-    bookings_dict = build_bookings_dict()
-    print (bookings_dict)
