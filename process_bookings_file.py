@@ -150,9 +150,8 @@ for i in range(sheet_bookings.nrows):
 # As determined by the sku_dict
 
 # Now we build a Customer Summary/Detail
+# Let's organize as this
 # order_dict: {cust_name:[[order1],[order2],[orderN]]}
-
-# Let's organize and summarize
 order_dict = {}
 orders = []
 order = []
@@ -163,7 +162,7 @@ for order_row in order_rows:
         x += 1
         continue
 
-    # Is this in the master dict ?
+    # Is this in the order dict ?
     if customer in order_dict:
         orders = []
         for order in order_dict[customer]:
@@ -171,34 +170,33 @@ for order_row in order_rows:
 
         orders.append(order_row)
         order_dict[customer] = orders
-
     else:
         orders = []
         orders.append(order_row)
         order_dict[customer]=orders
 
 
-# we now create a simple customer_list list
-# to contain a full set of unique customer names
-
-# Create a unique SET of Customers
+# Create a simple customer_list list of tuples
+# Contains a full set of unique sorted customer names
+# customer_list = [(erp_customer_name,end_customer_ultimate), (CustA,CustA)]
 customer_list = set(customer_list)
 
 # Convert the SET to a LIST so we can sort it
 customer_list = list(customer_list)
 
 # Sort the LIST
-# customer_list.sort()
 customer_list.sort(key=lambda tup: tup[0])
 print('We have: ', len(customer_list), ' customers')
 
 
-# Clean up orders to remove:
+# Clean up order_dict to remove:
 # 1.  +/- zero sum orders
 # 2. zero revenue orders
 order_dict = cleanup_orders(customer_list,order_dict,order_top_row)
 
-# Create a order file out of the order_dict
+#
+# Create a summary order file out of the order_dict
+#
 summary_order_rows=[]
 summary_order_rows.append(order_top_row)
 for key,val in order_dict.items():
@@ -206,29 +204,33 @@ for key,val in order_dict.items():
         summary_order_rows.append(my_row)
 
 #
-# Write the order file
+# Write the Summary order Excel File
+# Includes only those "Interesting" SKU's that are non-zero sum
 #
-# print(order_rows)
-# print(customer_list)
-
-
-workbook = xlsxwriter.Workbook(path_to_files + 'TA Order Summary' + app['AS_OF_DATE'] + '.xlsx')
+workbook = xlsxwriter.Workbook(path_to_files + app['XLS_ORDER_SUMMARY'] + app['AS_OF_DATE'] + '.xlsx')
 worksheet = workbook.add_worksheet()
-
 for this_row, my_val in enumerate(summary_order_rows):
     worksheet.write_row(this_row, 0, my_val)
-
 workbook.close()
 
 #
+# Write the Detailed order Excel File
+# Includes ALL "Interesting" SKU's
 #
-#
-workbook = xlsxwriter.Workbook(path_to_files + 'TA Order Details' + app['AS_OF_DATE']  + '.xlsx')
+workbook = xlsxwriter.Workbook(path_to_files + app['XLS_ORDER_DETAIL'] + app['AS_OF_DATE']  + '.xlsx')
 worksheet = workbook.add_worksheet()
-
 for this_row, my_val in enumerate(order_rows):
     worksheet.write_row(this_row, 0, my_val)
+workbook.close()
 
+#
+# Push TA Customer List to a local excel workbook
+#
+workbook = xlsxwriter.Workbook(path_to_files + app['XLS_CUSTOMER'] + app['AS_OF_DATE']  + '.xlsx')
+worksheet = workbook.add_worksheet()
+for this_row, my_val in enumerate(customer_list):
+    worksheet.write(this_row, 0, my_val[0])
+    worksheet.write(this_row, 1, my_val[1])
 workbook.close()
 
 exit()
@@ -248,19 +250,4 @@ ss_cols = [{'primary': True, 'title': 'ERP Customer Name', 'type': 'TEXT_NUMBER'
 ss_rows.insert(0, ['ERP Customer Name','End Customer Ultimate Name'])
 push_list_to_ss('Unique TA Customer Names',ss_cols, ss_rows)
 
-
-#
-# Push Unique Customer List to a local excel workbook
-#
-workbook = xlsxwriter.Workbook('unique_customers.xlsx')
-worksheet = workbook.add_worksheet()
-
-for this_row, my_val in enumerate(customer_list):
-    worksheet.write(this_row, 0, my_val[0])
-    worksheet.write(this_row, 1, my_val[1])
-
-workbook.close()
-
-
-exit()
 
