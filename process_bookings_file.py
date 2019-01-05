@@ -231,6 +231,10 @@ push_xls_to_ss(wb_file, app['XLS_ORDER_DETAIL'])
 #
 # Write TA Customer List to a local excel workbook
 #
+# Insert a header row before writing
+top_row = ['erp_customer_name','end_customer_ultimate_name']
+customer_list.insert(0,top_row)
+
 wb_file = path_to_files + app['XLS_CUSTOMER'] + app['AS_OF_DATE']  + '.xlsx'
 workbook = xlsxwriter.Workbook(wb_file)
 worksheet = workbook.add_worksheet()
