@@ -71,6 +71,10 @@ for idx, val in enumerate(bookings_dict['col_info']):
         col_pss_num = idx
     if col_name == 'TSA':
         col_tsa_num = idx
+    if col_name == 'Product Type':
+        col_prod_type_num = idx
+    if col_name == 'Sensor Count':
+        col_sensor_cnt_num = idx
 
 order_row = order_top_row
 order_rows.append(order_row)
@@ -89,7 +93,9 @@ for i in range(sheet_bookings.nrows):
         order_row = []
         sales_level = ''
         sales_level_cntr = 0
+        sku_type = sku_dict[sku][0]
         sku_desc = sku_dict[sku][1]
+        sku_sensor_cnt = sku_dict[sku][2]
 
         # Walk across the bookings_dict columns
         # to build this output row cell by cell
@@ -124,6 +130,12 @@ for i in range(sheet_bookings.nrows):
             elif col_name == 'Product Description':
                 # Add in the Product Description
                 order_row.append(sku_desc)
+            elif col_name == 'Product Type':
+                # Add in the Product Type
+                order_row.append(sku_type)
+            elif col_name == 'Sensor Count':
+                # Add in the Sensor Count
+                order_row.append(sku_sensor_cnt)
             elif col_name == 'Renewal Date(s)':
                 # Add in the Renewal Date if there is one
                 # Else just add a blank string

@@ -15,6 +15,7 @@ def build_sku_dict():
         sku = ''
         sku_type = ''
         sku_desc = ''
+        sensor_count = 0
         x = 0
         for row_data in row['cells']:
             x += 1
@@ -24,8 +25,10 @@ def build_sku_dict():
                 sku_type = row_data['value']
             elif x == 3:
                 sku_desc = row_data['value']
+            elif x == 4:
+                sensor_count = row_data['value']
 
-        sku_dict[sku] = [sku_type, sku_desc]
+        sku_dict[sku] = [sku_type, sku_desc, sensor_count]
 
     #
     # the sku_dict is now created !!!
