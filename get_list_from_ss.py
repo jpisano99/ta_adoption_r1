@@ -14,7 +14,7 @@ def get_list_from_ss(my_ss):
 
     # Add column names as first row
     my_rows = [col_names]
-    print(col_names)
+    # print(col_names)
 
     # Now add each row to the list
     for row in my_coverage.rows:

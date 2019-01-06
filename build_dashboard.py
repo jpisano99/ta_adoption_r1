@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     new_rows = []
     for customer, orders in customer_order_dict.items():
-        print (customer,'\t\t', 'has ', len(orders),' orders')
+        # print (customer,'\t\t', 'has ', len(orders),' orders')
         sensor_count = 0
         service_count = 0
         bookings_total = 0
@@ -122,9 +122,10 @@ if __name__ == "__main__":
                 sensor_count = order[12] + sensor_count
             elif order[9] == 'Service':  # Service Count column
                 service_count = order[12] + service_count
-            print (i+1, '  ', order)
-            time.sleep (1)
+            # print (i+1, '  ', order)
+            time.sleep (.25)
 
+        # Build the new row for this customer
         new_row.append(order[0])
         new_row.append(order[1])
         new_row.append(order[2])
@@ -135,10 +136,10 @@ if __name__ == "__main__":
 
 
 
-        print('\t CX Status', cx_update)
-        print('\t Sensors', sensor_count)
-        print('\t Services', service_count)
-        print('\t Total Bookings', bookings_total)
+        # print('\t CX Status', cx_update)
+        # print('\t Sensors', sensor_count)
+        # print('\t Services', service_count)
+        # print('\t Total Bookings', bookings_total)
         new_rows.append(new_row)
 
         print (new_rows)
