@@ -4,6 +4,7 @@ import time
 from get_cx_update import get_cx_update
 import xlsxwriter
 from dashboard_xls import dashboard_xls
+from push_xls_to_ss import push_xls_to_ss
 
 def test_it(order_rows):
     # Now we build a Customer Summary/Detail
@@ -161,13 +162,15 @@ if __name__ == "__main__":
 
         #print('-----------------------------------------')
 
-        #
-        # Write the Dashboard to an Excel File
+    #
+    # Write the Dashboard to an Excel File
 
-        #
-        wb_file = path_to_files + 'jim' + '.xlsx'
-        workbook = xlsxwriter.Workbook(wb_file)
-        worksheet = workbook.add_worksheet()
-        for this_row, my_val in enumerate(new_rows):
-            worksheet.write_row(this_row, 0, my_val)
-        workbook.close()
+    #
+    wb_file = path_to_files + 'jim' + '.xlsx'
+    workbook = xlsxwriter.Workbook(wb_file)
+    worksheet = workbook.add_worksheet()
+    for this_row, my_val in enumerate(new_rows):
+        worksheet.write_row(this_row, 0, my_val)
+    workbook.close()
+
+    push_xls_to_ss(wb_file, app['SS_DASHBOARD'])
