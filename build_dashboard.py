@@ -104,13 +104,18 @@ if __name__ == "__main__":
         service_bookings = 0
         bookings_total = 0
         new_row = []
-        cx_update = ''
+        cx_contact = ''
+        cx_status = ''
 
         # Look up the CX update
         if customer in cx_dict:
-            cx_update = 'FOUND CX Update: ' + str(cx_dict[customer])
+            cx_contact = cx_dict[customer][0]
+            cx_status = cx_dict[customer][1]
+            # cx_update = 'FOUND CX Update: ' + str(cx_dict[customer])
         else:
-            cx_update = 'NO CX Update FOUND'
+            cx_contact = 'None assigned'
+            cx_status = ''
+            # cx_update = 'NO CX Update FOUND'
 
         # Loop over this customers orders and
         # Create one summary row for this customer
@@ -127,29 +132,23 @@ if __name__ == "__main__":
 
         # Build the new row for this customer
         for x, col in enumerate(dashboard_xls):
-            if col[0] == 'Software':
+            if col[0] == 'Sensor Count':
                 new_row.append(sensor_count)
                 continue
             elif col[0] == 'Total Bookings':
                 new_row.append(bookings_total)
                 continue
+            elif col[0] == 'CX Contact':
+                new_row.append(cx_contact)
+                continue
             elif col[0] == 'CX Status':
-                new_row.append(cx_update)
+                new_row.append(cx_status)
                 continue
             elif col[0] == 'Service Bookings':
                 new_row.append(service_bookings)
                 continue
 
             new_row.append(order[x])
-
-
-            # new_row.append(order[1])
-            # new_row.append(order[2])
-            # new_row.append(order[3])
-            # new_row.append(cx_update)
-            # new_row.append(sensor_count)
-            # new_row.append(bookings_total)
-
 
 
         # print('\t CX Status', cx_update)
