@@ -2,6 +2,8 @@ from settings import app
 import xlrd
 import time
 from get_cx_update import get_cx_update
+import xlsxwriter
+from dashboard_xls import dashboard_xls
 
 def test_it(order_rows):
     # Now we build a Customer Summary/Detail
@@ -38,7 +40,7 @@ if __name__ == "__main__":
     home = app['HOME']
     working_dir = app['WORKING_DIR']
     # orders_file = app['XLS_ORDER_SUMMARY'] # Master bookings has 9958 rows as of 12-15-18
-    orders_file = 'TA Order Summary_as_of_01_06_2019.xlsx'
+    orders_file = 'TA Order Summary_as_of_01_09_2019.xlsx'
     dashboard_file = app['SS_DASHBOARD']
 
     path_to_files = home +'\\' + working_dir  + '\\'
@@ -48,10 +50,14 @@ if __name__ == "__main__":
     wb_orders = xlrd.open_workbook(path_to_orders)
     sheet_orders = wb_orders.sheet_by_index(0)
 
+
+    #exit()
+
     #
     # Build a dict of Customer Orders
     # order_dict: {cust_name:[[order1],[order2],[orderN]]}
     #
+
     new_rows = []
     for i in range(sheet_orders.nrows):
         if i == 0:
@@ -75,64 +81,74 @@ if __name__ == "__main__":
     cx_dict = get_cx_update()
     # print ('CX Dict ', cx_dict)
 
-
     #
+    # Create top row for the dashboard
     #
-    #
-
-    dashboard = [['ERP End Customer Name', -1],
-                    ['End Customer Global Ultimate Name', -1],
-                    ['PSS', -1],
-                    ['TSA', -1],
-                    ['AS PM', -1],
-                    ['AS CSE', -1],
-                    ['AS Status', -1],
-                    ['SAAS Status', -1],
-                    ['CX Contact', -1],
-                    ['CX Status', -1],
-                    ['Renewal Date(s)', -1],
-                    ['Total Bookings', -1],
-                    ['Service Orders', -1],
-                    ['Sensor Count', -1],
-                    ['Active Sensors', -1],
-                    ['Sales Level 1', -1],
-                    ['Sales Level 2', -1],
-                    ['Sales Level 3', -1],
-                    ['Sales Level 4', -1],
-                    ['Sales Level 5', -1],
-                    ['Sales Level 6', -1]]
-
     new_rows = []
+    new_row = []
+    for x,col in enumerate(dashboard_xls):
+        col[1] = x
+        #print(x, col)
+        new_row.append(col[0])
+
+    new_rows.append(new_row)
+    print(new_row)
+
+    #
+    # Main loop
+    #
+
     for customer, orders in customer_order_dict.items():
         # print (customer,'\t\t', 'has ', len(orders),' orders')
         sensor_count = 0
-        service_count = 0
+        service_bookings = 0
         bookings_total = 0
         new_row = []
         cx_update = ''
 
+        # Look up the CX update
         if customer in cx_dict:
             cx_update = 'FOUND CX Update: ' + str(cx_dict[customer])
         else:
             cx_update = 'NO CX Update FOUND'
 
+        # Loop over this customers orders and
+        # Create one summary row for this customer
         for i, order in enumerate(orders):
-            bookings_total =  bookings_total + order[8]
-            if order[9] == 'Software': # Sensor Count column
-                sensor_count = order[12] + sensor_count
-            elif order[9] == 'Service':  # Service Count column
-                service_count = order[12] + service_count
+            bookings_total = bookings_total + order[11]
+
+            if order[13] == 'Software':  # Sensor Count column
+                sensor_count = order[16] + sensor_count
+            elif order[13] == 'Service':  # Service Count column
+                service_bookings = order[11] + service_bookings
+
             # print (i+1, '  ', order)
-            time.sleep (.25)
+            # time.sleep (.25)
 
         # Build the new row for this customer
-        new_row.append(order[0])
-        new_row.append(order[1])
-        new_row.append(order[2])
-        new_row.append(order[3])
-        new_row.append(cx_update)
-        new_row.append(sensor_count)
-        new_row.append(bookings_total)
+        for x, col in enumerate(dashboard_xls):
+            if col[0] == 'Software':
+                new_row.append(sensor_count)
+                continue
+            elif col[0] == 'Total Bookings':
+                new_row.append(bookings_total)
+                continue
+            elif col[0] == 'CX Status':
+                new_row.append(cx_update)
+                continue
+            elif col[0] == 'Service Bookings':
+                new_row.append(service_bookings)
+                continue
+
+            new_row.append(order[x])
+
+
+            # new_row.append(order[1])
+            # new_row.append(order[2])
+            # new_row.append(order[3])
+            # new_row.append(cx_update)
+            # new_row.append(sensor_count)
+            # new_row.append(bookings_total)
 
 
 
@@ -142,6 +158,17 @@ if __name__ == "__main__":
         # print('\t Total Bookings', bookings_total)
         new_rows.append(new_row)
 
-        print (new_rows)
+        #print (new_rows)
 
-        print('-----------------------------------------')
+        #print('-----------------------------------------')
+
+        #
+        # Write the Dashboard to an Excel File
+
+        #
+        wb_file = path_to_files + 'jim' + '.xlsx'
+        workbook = xlsxwriter.Workbook(wb_file)
+        worksheet = workbook.add_worksheet()
+        for this_row, my_val in enumerate(new_rows):
+            worksheet.write_row(this_row, 0, my_val)
+        workbook.close()
