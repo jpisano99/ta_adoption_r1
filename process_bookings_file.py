@@ -226,7 +226,7 @@ worksheet = workbook.add_worksheet()
 for this_row, my_val in enumerate(summary_order_rows):
     worksheet.write_row(this_row, 0, my_val)
 workbook.close()
-push_xls_to_ss(wb_file, app['XLS_ORDER_SUMMARY'])
+# push_xls_to_ss(wb_file, app['XLS_ORDER_SUMMARY'])
 
 #
 # Write the Detailed order Excel File
@@ -238,7 +238,7 @@ worksheet = workbook.add_worksheet()
 for this_row, my_val in enumerate(order_rows):
     worksheet.write_row(this_row, 0, my_val)
 workbook.close()
-push_xls_to_ss(wb_file, app['XLS_ORDER_DETAIL'])
+# push_xls_to_ss(wb_file, app['XLS_ORDER_DETAIL'])
 
 #
 # Write TA Customer List to a local excel workbook
@@ -254,6 +254,6 @@ for this_row, my_val in enumerate(customer_list):
     worksheet.write(this_row, 0, my_val[0])
     worksheet.write(this_row, 1, my_val[1])
 workbook.close()
-push_xls_to_ss(wb_file, app['XLS_CUSTOMER'])
+# push_xls_to_ss(wb_file, app['XLS_CUSTOMER'])
 
 exit()

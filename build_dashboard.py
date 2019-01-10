@@ -2,6 +2,8 @@ from settings import app
 import xlrd
 import time
 from get_cx_update import get_cx_update
+from get_as_update import get_as_update
+from get_saas_update import get_saas_update
 import xlsxwriter
 from dashboard_xls import dashboard_xls
 from push_xls_to_ss import push_xls_to_ss
@@ -82,6 +84,22 @@ if __name__ == "__main__":
     cx_dict = get_cx_update()
     # print ('CX Dict ', cx_dict)
 
+
+    #
+    # Get AS update
+    #
+    as_dict = get_as_update()
+
+    #
+    # Get SAAS update
+    #
+    saas_dict = get_saas_update()
+
+    # Create Platform dict for lookup
+    platform_dict = {'TA-CL-G1-39-K9': '39RU', 'TA-CL-G1-SFF8-K9': '8RU',
+                     'C1-TA-V-SW-K9': 'Sftw Only', 'C1-TAAS-WP-FND-K9': 'SAAS',
+                     'E2C1-TAAS-WPFND': 'SAAS'}
+
     #
     # Create top row for the dashboard
     #
@@ -107,16 +125,35 @@ if __name__ == "__main__":
         new_row = []
         cx_contact = ''
         cx_status = ''
+        as_contact = ''
+        as_status = ''
+        saas_contact = ''
+        saas_status = ''
+        platform_type = ''
 
         # Look up the CX update
         if customer in cx_dict:
             cx_contact = cx_dict[customer][0]
             cx_status = cx_dict[customer][1]
-            # cx_update = 'FOUND CX Update: ' + str(cx_dict[customer])
         else:
             cx_contact = 'None assigned'
             cx_status = ''
-            # cx_update = 'NO CX Update FOUND'
+
+        # Look up the AS update
+        if customer in as_dict:
+            as_contact = as_dict[customer][0]
+            as_status = as_dict[customer][1]
+        else:
+            as_contact = 'None assigned'
+            as_status = ''
+
+        # Look up the SAAS update
+        if customer in saas_dict:
+            saas_contact = saas_dict[customer][0]
+            saas_status = saas_dict[customer][1]
+        else:
+            saas_contact = 'None assigned'
+            saas_status = ''
 
         # Loop over this customers orders and
         # Create one summary row for this customer
@@ -127,6 +164,8 @@ if __name__ == "__main__":
                 sensor_count = order[16] + sensor_count
             elif order[13] == 'Service':  # Service Count column
                 service_bookings = order[11] + service_bookings
+            elif order[14] in platform_dict:
+                platform_type = platform_dict[order[14]]
 
             # print (i+1, '  ', order)
             # time.sleep (.25)
@@ -139,6 +178,15 @@ if __name__ == "__main__":
             elif col[0] == 'Total Bookings':
                 new_row.append(bookings_total)
                 continue
+            elif col[0] == 'AS CSE':
+                new_row.append(as_contact)
+                continue
+            elif col[0] == 'AS Status':
+                new_row.append(as_status)
+                continue
+            elif col[0] == 'SAAS Status':
+                new_row.append(saas_status)
+                continue
             elif col[0] == 'CX Contact':
                 new_row.append(cx_contact)
                 continue
@@ -147,6 +195,9 @@ if __name__ == "__main__":
                 continue
             elif col[0] == 'Service Bookings':
                 new_row.append(service_bookings)
+                continue
+            elif col[0] == 'Product Description':
+                new_row.append(platform_type)
                 continue
 
             new_row.append(order[x])
@@ -173,4 +224,4 @@ if __name__ == "__main__":
         worksheet.write_row(this_row, 0, my_val)
     workbook.close()
 
-    push_xls_to_ss(wb_file, app['SS_DASHBOARD'])
+    # push_xls_to_ss(wb_file, app['SS_DASHBOARD'])
