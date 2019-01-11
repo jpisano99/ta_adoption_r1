@@ -141,7 +141,12 @@ if __name__ == "__main__":
 
         # Look up the AS update
         if customer in as_dict:
-            as_contact = as_dict[customer][0]
+            if as_dict[customer][0] == '':
+                as_contact = 'None Assigned'
+            else:
+                as_contact = 'None Assigned'
+                #as_contact = as_dict[customer][0]
+
             as_status = as_dict[customer][1]
         else:
             as_contact = 'None assigned'

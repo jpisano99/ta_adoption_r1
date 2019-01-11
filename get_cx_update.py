@@ -2,6 +2,10 @@ from get_list_from_ss import *
 from settings import app
 
 
+#
+# Pull cx data from it's SS and return a dict
+# example: cx_dict = {'customer':[cx_contact],cx[status]}
+#
 def get_cx_update():
     cx_sheet = app['SS_CX']
 
@@ -10,9 +14,9 @@ def get_cx_update():
     for i, row in enumerate(rows):
         if i == 0:
             continue
-        customer_name = row[1]
-        cx_contact = row[20]
-        cx_status = row[16]
+        customer_name = row[1]  # column # 1
+        cx_contact = row[20] # column # 20
+        cx_status = row[16] # column # 16
         cx_dict[customer_name] = [cx_contact, cx_status]
 
     return cx_dict
