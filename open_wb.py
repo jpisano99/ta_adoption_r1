@@ -17,7 +17,7 @@ def open_wb(excel_file):
     my_wb = xlrd.open_workbook(path_to_file)
     my_sheet = my_wb.sheet_by_index(0)
 
-    return [my_wb, my_sheet]
+    return my_wb, my_sheet
 
 
 if __name__ == "__main__":
