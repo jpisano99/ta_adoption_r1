@@ -1,12 +1,11 @@
 from settings import app
 import xlrd
-import time
 from get_cx_update import get_cx_update
 from get_as_update import get_as_update
 from get_saas_update import get_saas_update
 import xlsxwriter
 from dashboard_xls import dashboard_xls
-from push_xls_to_ss import push_xls_to_ss
+# from push_xls_to_ss import push_xls_to_ss
 
 def test_it(order_rows):
     # Now we build a Customer Summary/Detail
@@ -33,8 +32,9 @@ def test_it(order_rows):
         else:
             orders = []
             orders.append(order_row)
-            order_dict[customer]=orders
+            order_dict[customer] = orders
     return order_dict
+
 
 if __name__ == "__main__":
     #
@@ -46,15 +46,14 @@ if __name__ == "__main__":
     orders_file = 'TA Order Summary_as_of_01_09_2019.xlsx'
     dashboard_file = app['SS_DASHBOARD']
 
-    path_to_files = home +'\\' + working_dir  + '\\'
+    path_to_files = home + '\\' + working_dir + '\\'
     path_to_orders = path_to_files + orders_file
     path_to_dashboard = path_to_files + dashboard_file
 
     wb_orders = xlrd.open_workbook(path_to_orders)
     sheet_orders = wb_orders.sheet_by_index(0)
 
-
-    #exit()
+    # exit()
 
     #
     # Build a dict of Customer Orders
@@ -74,8 +73,8 @@ if __name__ == "__main__":
         new_rows.append(new_row)
 
     customer_order_dict = test_it(new_rows)
-    print('We have: ', len(customer_order_dict),' customers')
-    print('with ', len(new_rows),' skus')
+    print('We have: ', len(customer_order_dict), ' customers')
+    print('with ', len(new_rows), ' skus')
     print()
 
     #
@@ -83,7 +82,6 @@ if __name__ == "__main__":
     #
     cx_dict = get_cx_update()
     # print ('CX Dict ', cx_dict)
-
 
     #
     # Get AS update
@@ -105,9 +103,9 @@ if __name__ == "__main__":
     #
     new_rows = []
     new_row = []
-    for x,col in enumerate(dashboard_xls):
+    for x, col in enumerate(dashboard_xls):
         col[1] = x
-        #print(x, col)
+        # print(x, col)
         new_row.append(col[0])
 
     new_rows.append(new_row)
@@ -145,7 +143,7 @@ if __name__ == "__main__":
                 as_contact = 'None Assigned'
             else:
                 as_contact = 'None Assigned'
-                #as_contact = as_dict[customer][0]
+                # as_contact = as_dict[customer][0]
 
             as_status = as_dict[customer][1]
         else:
@@ -207,16 +205,14 @@ if __name__ == "__main__":
 
             new_row.append(order[x])
 
-
         # print('\t CX Status', cx_update)
         # print('\t Sensors', sensor_count)
         # print('\t Services', service_count)
         # print('\t Total Bookings', bookings_total)
         new_rows.append(new_row)
 
-        #print (new_rows)
-
-        #print('-----------------------------------------')
+        # print (new_rows)
+        # print('-----------------------------------------')
 
     #
     # Write the Dashboard to an Excel File

@@ -1,5 +1,6 @@
-from get_list_from_ss import *
+from get_list_from_ss import get_list_from_ss
 from settings import app
+
 
 def get_saas_update():
     saas_sheet = app['SS_SAAS']
@@ -20,14 +21,6 @@ def get_saas_update():
 
 if __name__ == "__main__":
     print(get_saas_update())
-
-
-
-
-
-
-
-
 
 # from get_list_from_ss import *
 # import xlrd

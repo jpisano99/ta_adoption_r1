@@ -13,6 +13,7 @@ from Ssheet_class import Ssheet
 # push_list_to_ss('Thurs Test',ss_cols, ss_rows)
 #
 
+
 def push_list_to_ss(ss_name, my_cols, my_rows):
 
     my_ss = Ssheet(ss_name)
@@ -22,7 +23,7 @@ def push_list_to_ss(ss_name, my_cols, my_rows):
         exit()
     else:
         # Assumption is we are CREATING this SmartSheet first
-        my_ss.create_sheet(ss_name,my_cols)
+        my_ss.create_sheet(ss_name, my_cols)
         my_ss.refresh()
 
         # Grab the col_names from the FIRST row of my_rows
@@ -37,7 +38,7 @@ def push_list_to_ss(ss_name, my_cols, my_rows):
         for row_num, row in enumerate(my_rows):
             cells_to_add = []
 
-            if row_num == 0 :
+            if row_num == 0:
                 continue
 
             # Go across the columns to add cells for this row

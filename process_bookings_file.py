@@ -204,12 +204,10 @@ push_list_to_xls(order_rows, app['XLS_ORDER_DETAIL'])
 push_list_to_xls(customer_list, app['XLS_CUSTOMER'])
 
 exit()
-
 #
 # Push our lists to a smart sheet
 #
 # push_xls_to_ss(wb_file, app['XLS_ORDER_SUMMARY'])
 # push_xls_to_ss(wb_file, app['XLS_ORDER_DETAIL'])
 # push_xls_to_ss(wb_file, app['XLS_CUSTOMER'])
-
 exit()

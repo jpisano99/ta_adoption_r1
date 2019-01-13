@@ -1,9 +1,9 @@
 import smartsheet
 from smartsheet_basic_functions import ss_get_ws, ss_move_sheet
-from settings import app,passwords
+from settings import app, passwords
 
 
-def push_xls_to_ss(my_file,ss_name):
+def push_xls_to_ss(my_file, ss_name):
     ws = app['SS_WORKSPACE']
 
     ss_token = passwords['SS_TOKEN']
