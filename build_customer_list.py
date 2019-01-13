@@ -10,7 +10,7 @@ def build_customer_list():
     #
     home = app['HOME']
     working_dir = app['WORKING_DIR']
-    bookings_file = app['BOOKINGS']  # Master bookings has 9958 rows as of 12-15-18
+    bookings_file = app['XLS_BOOKINGS']  # Master bookings has 9958 rows as of 12-15-18
     path_to_files = home + '\\' + working_dir + '\\'
     path_to_bookings = path_to_files + bookings_file
 
@@ -26,7 +26,6 @@ def build_customer_list():
     # First find the column numbers for these column names in the book
     #
     for val in bookings_dict['col_info']:
-        print(val)
         if val[0] == 'ERP End Customer Name':
             col_num_erp = val[1]
         elif val[0] == 'End Customer Global Ultimate Name':
