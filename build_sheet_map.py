@@ -9,7 +9,7 @@ def build_sheet_map(file_name, my_map, tag):
     # A local excel sheet or Smart Sheet
     if tag[:2] == 'SS':
         # Get the list of columns
-        my_sheet = Ssheet(file_name)
+        my_sheet = Ssheet(file_name, True)
         my_columns = my_sheet.columns
 
         # Loop across the Smart Sheet columns

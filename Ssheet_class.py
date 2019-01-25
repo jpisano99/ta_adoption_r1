@@ -1,4 +1,5 @@
 from smartsheet_basic_functions import *
+import inspect
 
 
 ss_config = dict(
@@ -11,7 +12,7 @@ class Ssheet:
     ss_token = ss_config['SS_TOKEN']
     ss = smartsheet.Smartsheet(ss_token)
 
-    def __init__(self, name):
+    def __init__(self, name, meta_data_only=False):
         self.name = name
         self.sheet = {}
         self.id = 0
@@ -19,9 +20,9 @@ class Ssheet:
         self.rows = {}
         self.col_name_idx = {}
         self.col_id_idx = {}
-        self.refresh()
+        self.refresh(meta_data_only)
 
-    def refresh(self):
+    def refresh(self, meta_data_only):
         self.sheet = ss_get_sheet(self.ss, self.name)
         self.id = self.sheet['id']
 
@@ -29,9 +30,18 @@ class Ssheet:
         # so skip refreshing the following to avoid an error
         if self.id != -1:
             self.columns = ss_get_col_data(self.ss, self.id)
-            self.rows = ss_get_row_data(self.ss, self.id)
+            # self.rows = ss_get_row_data(self.ss, self.id)
             self.col_name_idx = ss_col_name_idx(self.ss, self.columns)
             self.col_id_idx = ss_col_id_idx(self.ss, self.columns)
+        if not meta_data_only:
+            print('ALL Data for ', self.name)
+            # current_frame = inspect.currentframe()
+            # calling_frame = inspect.getouterframes(current_frame, 2)
+            # print('caller name:', calling_frame[1][3])
+            # print('caller name:',)
+            self.rows = ss_get_row_data(self.ss, self.id)
+        else:
+            print('Meta Data Only', self.name)
 
     def row_lookup(self, col_name, row_value):
         # Return a list of all row_ids

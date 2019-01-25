@@ -6,7 +6,7 @@ from Ssheet_class import Ssheet
 #
 def get_list_from_ss(my_ss):
 
-    my_coverage = Ssheet(my_ss)
+    my_coverage = Ssheet(my_ss, False)
 
     col_names = []
     for column in my_coverage.columns:

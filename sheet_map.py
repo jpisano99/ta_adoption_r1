@@ -26,3 +26,8 @@ sheet_map = [['ERP End Customer Name', 'XLS_BOOKINGS', -1, 'Customer Name'],
              ['Sales Level 4', 'XLS_BOOKINGS', -1, ''],
              ['Sales Level 5', 'XLS_BOOKINGS', -1, ''],
              ['Sales Level 6', 'XLS_BOOKINGS', -1, '']]
+
+sheet_keys = [['XLS_BOOKINGS', 'ERP End Customer Name', -1],
+              ['SS_CX', 'Account Name', -1],
+              ['SS_SAAS', 'Customer name', -1],
+              ['SS_AS', 'Customer Name', -1]]
