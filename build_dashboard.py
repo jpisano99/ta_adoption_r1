@@ -20,9 +20,6 @@ def create_customer_dict(order_rows):
     x = 0
     for order_row in order_rows:
         customer = order_row[0]
-        if x==0:
-            x += 1
-            continue
 
         # Is this in the order dict ?
         if customer in order_dict:
@@ -76,10 +73,8 @@ if __name__ == "__main__":
     # Get dict updates from linked sheets CX/AS/SAAS
     #
     cx_dict = get_linked_sheet_update(sheet_map, 'SS_CX', sheet_keys)
-    # as_dict = get_linked_sheet_update(sheet_map, 'SS_AS', sheet_keys)
-    # saas_dict = get_linked_sheet_update(sheet_map, 'SS_SAAS', sheet_keys)
-    saas_dict = {}
-    as_dict = {}
+    as_dict = get_linked_sheet_update(sheet_map, 'SS_AS', sheet_keys)
+    saas_dict = get_linked_sheet_update(sheet_map, 'SS_SAAS', sheet_keys)
 
     print()
     print('CX Dict ', cx_dict)
@@ -121,14 +116,29 @@ if __name__ == "__main__":
         print('Customer:', customer, 'has ', len(orders), ' orders')
 
         new_row = []
+
+        # Default Values
         bookings_total = 0
         sensor_count = 0
         service_bookings = 0
         platform_type = 'Not Identified'
 
+        saas_status = 'No Status'
+        cx_contact = 'None assigned'
+        cx_status = 'No Update'
+        as_pm = ''
+        as_cse = ''
+        as_complete = ''
+        as_comments = ''
+
         #
         # Get update from linked sheets (if any)
         #
+        if customer in saas_dict:
+            saas_status = saas_dict[customer][0]
+        else:
+            saas_status = 'No Status'
+
         if customer in cx_dict:
             cx_contact = cx_dict[customer][0]
             cx_status = cx_dict[customer][1]
@@ -138,13 +148,24 @@ if __name__ == "__main__":
 
         if customer in as_dict:
             if as_dict[customer][0] == '':
-                as_contact = 'None Assigned'
+                as_pm = 'None Assigned'
             else:
-                as_contact = 'None Assigned'
-            as_status = as_dict[customer][1]
-        else:
-            as_contact = 'None assigned'
-            as_status = 'No Update'
+                as_pm = as_dict[customer][0]
+
+            if as_dict[customer][1] == '':
+                as_cse = 'None Assigned'
+            else:
+                as_cse = as_dict[customer][1]
+
+            if as_dict[customer][2] == '':
+                as_complete = 'No Update'
+            else:
+                as_complete = as_dict[customer][2]
+
+            if as_dict[customer][3] == '':
+                as_comments = 'No Comments'
+            else:
+                as_comments = as_dict[customer][3]
 
         #
         # Loop over this customers orders
@@ -169,8 +190,16 @@ if __name__ == "__main__":
         order[my_col_idx['Total Bookings']] = bookings_total
         order[my_col_idx['Sensor Count']] = sensor_count
         order[my_col_idx['Service Bookings']] = service_bookings
+
         order[my_col_idx['CuSM Name']] = cx_contact
         order[my_col_idx['Next Action']] = cx_status
+
+        order[my_col_idx['AS PM']] = as_pm
+        order[my_col_idx['AS CSE']] = as_cse
+        order[my_col_idx['Project Status/PM Completion']] = as_complete
+        order[my_col_idx['Delivery Comments']] = as_comments
+
+        order[my_col_idx['Provisioning completed']] = saas_status
 
         new_rows.append(order)
 
