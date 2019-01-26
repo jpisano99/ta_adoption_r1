@@ -38,6 +38,6 @@ def get_linked_sheet_update(my_map, my_tag, my_keys):
         for column in link_col_data:
             row_data.append(row[column[1]])
 
-        my_dict[dict_key] = [row_data]
+        my_dict[dict_key] = row_data
 
     return my_dict
