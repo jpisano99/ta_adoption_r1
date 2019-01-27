@@ -1,74 +1,36 @@
 from settings import app
 from open_wb import open_wb
 from push_list_to_xls import push_list_to_xls
+from create_customer_order_dict import create_customer_order_dict
 from get_linked_sheet_update import get_linked_sheet_update
 from build_sheet_map import build_sheet_map
 from sheet_map import sheet_map, sheet_keys
-import time
-import xlsxwriter
-
 # from push_xls_to_ss import push_xls_to_ss
 
 
-def create_customer_dict(order_rows):
-    # Now we build a Customer Summary/Detail
-    # Let's organize as this
-    # order_dict: {cust_name:[[order1],[order2],[orderN]]}
-    order_dict = {}
-    orders = []
-    order = []
-    x = 0
-    for order_row in order_rows:
-        customer = order_row[0]
-
-        # Is this in the order dict ?
-        if customer in order_dict:
-            orders = []
-            for order in order_dict[customer]:
-                orders.append(order)
-
-            orders.append(order_row)
-            order_dict[customer] = orders
-        else:
-            orders = []
-            orders.append(order_row)
-            order_dict[customer] = orders
-    return order_dict
-
-
 if __name__ == "__main__":
+    #
     # Open the order summary
-    wb_orders, sheet_orders = open_wb('TA Order Summary_as_of_01_26_2019.xlsx')
-    print(wb_orders, sheet_orders)
-
     #
-    # Build a dict of Customer Orders
-    # order_dict: {cust_name:[[order1],[order2],[orderN]]}
-    #
-    new_rows = []
+    wb_orders, sheet_orders = open_wb('TA Order Summary_as_of_01_27_2019.xlsx')
 
-    # Loop over the orders
-    # Create a simple list from orders workbook
-    for i in range(sheet_orders.nrows):
-        if i == 0:
-            continue
-        my_row = sheet_orders.row(i)
-        new_row = []
-        for cell in my_row:
-            new_row.append(cell.value)
-
-        new_rows.append(new_row)
+    # Loop over the orders XLS worksheet
+    # Create a simple list of orders with NO headers
+    order_list = []
+    for i in range(1, sheet_orders.nrows):  # Skip the header row start at 1
+        order_list.append(sheet_orders.row_values(i))
 
     # Create a dict of customer orders
-    customer_order_dict = create_customer_dict(new_rows)
+    customer_order_dict = create_customer_order_dict(order_list)
+    print()
     print('We have: ', len(customer_order_dict), ' customers')
-    print('with ', len(new_rows), ' skus')
+    print('with ', len(order_list), ' skus')
 
+    # Build Sheet Maps
     sheet_map = build_sheet_map(app['SS_CX'], sheet_map, 'SS_CX')
     sheet_map = build_sheet_map(app['SS_AS'], sheet_map, 'SS_AS')
     sheet_map = build_sheet_map(app['SS_SAAS'], sheet_map, 'SS_SAAS')
 
-    print('got sheet maps')
     #
     # Get dict updates from linked sheets CX/AS/SAAS
     #
@@ -77,9 +39,9 @@ if __name__ == "__main__":
     saas_dict = get_linked_sheet_update(sheet_map, 'SS_SAAS', sheet_keys)
 
     print()
-    print('CX Dict ', cx_dict)
-    print('AS Dict ', as_dict)
-    print('SAAS Dict ', saas_dict)
+    print('We have CX Updates: ', len(cx_dict))
+    print('We have AS Updates: ', len(as_dict))
+    print('We have SAAS Updates: ', len(saas_dict))
     print()
 
     # Create Platform dict for lookup
@@ -88,7 +50,7 @@ if __name__ == "__main__":
                      'E2C1-TAAS-WPFND': 'SAAS'}
 
     #
-    # Create top row for the dashboard
+    # Init Main Loop Variables
     #
     new_rows = []
     new_row = []
@@ -99,23 +61,21 @@ if __name__ == "__main__":
     sku_col_num = -1
     my_col_idx = {}
 
+    # Create top row for the dashboard
+    # also make a dict (my_col_idx) of {column names : column number}
     for col_idx, col in enumerate(sheet_map):
         new_row.append(col[0])
-        my_col_idx[col[0]] = col_idx # Make a dict of {column names : column number}
-
-    print(my_col_idx)
+        my_col_idx[col[0]] = col_idx
     new_rows.append(new_row)
-    print(new_rows)
     print(my_col_idx)
-    print()
+    #exit()
 
     #
     # Main loop
     #
     for customer, orders in customer_order_dict.items():
-        print('Customer:', customer, 'has ', len(orders), ' orders')
-
         new_row = []
+        orders_found = len(orders)
 
         # Default Values
         bookings_total = 0
@@ -181,11 +141,13 @@ if __name__ == "__main__":
             if order[my_col_idx['Product Type']] == 'Service':
                 service_bookings = service_bookings + order[my_col_idx['Total Bookings']]
 
-            if order[sku_col_num] in platform_dict:
-                platform_type = platform_dict[order[sku_col_num]]
+            if order[my_col_idx['Bundle Product ID']] in platform_dict:
+                platform_type = platform_dict[order[my_col_idx['Bundle Product ID']]]
+            else:
+                platform_type = 'Unknown'
 
         #
-        # Modify this record as need and add to the new_rows
+        # Modify/Update this record as needed and then add to the new_rows
         #
         order[my_col_idx['Total Bookings']] = bookings_total
         order[my_col_idx['Sensor Count']] = sensor_count
@@ -201,7 +163,33 @@ if __name__ == "__main__":
 
         order[my_col_idx['Provisioning completed']] = saas_status
 
+        order[my_col_idx['Product Description']] = platform_type
+
+        order[my_col_idx['Orders Found']] = orders_found
+
         new_rows.append(order)
+    #
+    # End of main loop
+    #
+
+    # Do some clean up and ready for output
+    #
+    # Rename the columns as per the sheet map
+    cols_to_delete = []
+    for idx, map_info in enumerate(sheet_map):
+        if map_info[3] != '':
+            if map_info[3] == '*DELETE*':
+                # Put the columns to delete in a list
+                cols_to_delete.append(idx)
+            else:
+                # Rename to the new column name
+                new_rows[0][idx] = map_info[3]
+
+    # Loop over the new_rows and
+    # delete columns we don't need as per the sheet_map
+    for col_idx in sorted(cols_to_delete, reverse=True):
+        for row_idx, my_row in enumerate(new_rows):
+            del new_rows[row_idx][col_idx]
 
     #
     # Write the Dashboard to an Excel File

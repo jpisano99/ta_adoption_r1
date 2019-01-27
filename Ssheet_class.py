@@ -34,14 +34,7 @@ class Ssheet:
             self.col_name_idx = ss_col_name_idx(self.ss, self.columns)
             self.col_id_idx = ss_col_id_idx(self.ss, self.columns)
         if not meta_data_only:
-            print('ALL Data for ', self.name)
-            # current_frame = inspect.currentframe()
-            # calling_frame = inspect.getouterframes(current_frame, 2)
-            # print('caller name:', calling_frame[1][3])
-            # print('caller name:',)
             self.rows = ss_get_row_data(self.ss, self.id)
-        else:
-            print('Meta Data Only', self.name)
 
     def row_lookup(self, col_name, row_value):
         # Return a list of all row_ids
