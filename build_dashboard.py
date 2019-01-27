@@ -12,7 +12,7 @@ if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('TA Order Summary_as_of_01_27_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_01_27_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers
@@ -67,8 +67,6 @@ if __name__ == "__main__":
         new_row.append(col[0])
         my_col_idx[col[0]] = col_idx
     new_rows.append(new_row)
-    print(my_col_idx)
-    #exit()
 
     #
     # Main loop
@@ -194,5 +192,5 @@ if __name__ == "__main__":
     #
     # Write the Dashboard to an Excel File
     #
-    push_list_to_xls(new_rows, 'test_dash')
+    push_list_to_xls(new_rows, app['XLS_DASHBOARD'])
     exit()
