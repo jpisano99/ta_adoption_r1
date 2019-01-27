@@ -73,6 +73,7 @@ if __name__ == "__main__":
     #
     for customer, orders in customer_order_dict.items():
         new_row = []
+        order = []
         orders_found = len(orders)
 
         # Default Values
