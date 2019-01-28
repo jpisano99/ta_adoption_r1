@@ -1,39 +1,71 @@
-import time
 import datetime
 import xlrd
 from open_wb import open_wb
+from build_sheet_map import build_sheet_map
+from sheet_map import sheet_map
 from settings import app
 
 
 def build_renewals_dict(wb, sheet):
     # Return a dict (my_dict) with bookings file info
-    my_list = ['End Customer', 'Renewal Date', 'Monthly Charge', 'Product Bookings']
     my_dict = {}
+    my_map = build_sheet_map(app['XLS_RENEWALS'], sheet_map, 'XLS_RENEWALS')
 
-    # Loop across all column headings in the renewals file and
-    # Find the column number that matches the col_name in my_list
-    for sheet_col_num in range(sheet.ncols):
+    # Strip out all other un-needed tags from the sheet_map
+    tmp_list = []
+    for idx, x in enumerate(my_map):
+        if x[1] == 'XLS_RENEWALS':
+            tmp_list.append(my_map[idx])
+    my_map = tmp_list
 
-        # Loop across my_list to find a match from the bookings file
-        for idx, col_name in enumerate(my_list):
-            if col_name == sheet.cell_value(0, sheet_col_num):
-                my_list[idx] = (col_name, sheet_col_num)
+    # Loop over all of the renewal records
+    for row_num in range(1, sheet.nrows):
+        customer = sheet.cell_value(row_num, 0)
+        if customer in my_dict:
+            tmp_record = []
+            tmp_records = my_dict[customer]
+        else:
+            tmp_record = []
+            tmp_records = []
 
-    # [('End Customer', 0), ('Renewal Date', 4), ('Monthly Charge', 9)]
+        # Loop over the sheet map
+        for col_map in my_map:
+            my_cell = sheet.cell_value(row_num, col_map[2])
 
-    # Now Loop through all the rows and build my_dict
-    for renewals_row_num in range(sheet.nrows):
+            # Is this cell a Date type (3) ?
+            # If so format as a M/D/Y
+            if sheet.cell_type(row_num, col_map[2]) == 3:
+                my_cell = datetime.datetime(*xlrd.xldate_as_tuple(my_cell, wb.datemode))
+                my_cell = my_cell.strftime('%m-%d-%Y')
 
-        if renewals_row_num == 0:
-            continue
+            tmp_record.append(my_cell)
 
-        customer = sheet.cell_value(renewals_row_num, my_list[0][1])
-        renewal_date = sheet.cell_value(renewals_row_num, my_list[1][1])
+        tmp_records.append(tmp_record)
+        my_dict[customer] = tmp_records
 
-        renewal_date = datetime.datetime(*xlrd.xldate_as_tuple(renewal_date, wb.datemode))
-        renewal_date = renewal_date.strftime('%m-%d-%Y')
+    #
+    # Here we compress and summarize the dict
+    #
+    for customer, renewals in my_dict.items():
+        renewal_dates = {}
 
-        my_dict[customer] = [renewal_date, sheet.cell_value(renewals_row_num, my_list[2][1])]
+        for renewal in renewals:
+            renewal_date = renewal[0]
+            renewal_revenue = renewal[1]
+
+            if renewal_date in renewal_dates:
+                total_revenue = renewal_dates[renewal_date] + renewal_revenue
+                renewal_dates[renewal_date] = total_revenue
+            else:
+                renewal_dates[renewal_date] = renewal_revenue
+
+        #
+        # Convert renewals_dates from a dict to a list and
+        # Update the my_dict for this customer
+        tmp_list = []
+        for tmp_date, tmp_revenue in renewal_dates.items():
+            tmp_list.append([tmp_date, tmp_revenue])
+        my_dict[customer] = tmp_list
 
     return my_dict
 
@@ -42,4 +74,3 @@ if __name__ == "__main__":
     wb_renewals, sheet_renewals = open_wb(app['XLS_RENEWALS'])
     renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
     print(renewals_dict)
-    print(len(renewals_dict))
