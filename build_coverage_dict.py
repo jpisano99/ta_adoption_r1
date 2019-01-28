@@ -5,6 +5,7 @@ from settings import app
 # Create a dict called team_dict from the coverage smartsheet
 #
 
+
 def build_coverage_dict():
     # Create an object from SmartSheets
     coverage = app['SS_COVERAGE']

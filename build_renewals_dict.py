@@ -7,20 +7,17 @@ from settings import app
 
 def build_renewals_dict(wb, sheet):
     # Return a dict (my_dict) with bookings file info
-    my_list = ['End Customer', 'Renewal Date', 'Monthly Charge']
+    my_list = ['End Customer', 'Renewal Date', 'Monthly Charge', 'Product Bookings']
     my_dict = {}
 
     # Loop across all column headings in the renewals file and
     # Find the column number that matches the col_name in my_list
-    for renewals_col_num in range(sheet.ncols):
-        # print(sheet.cell_value(0, renewals_col_num))
+    for sheet_col_num in range(sheet.ncols):
 
         # Loop across my_list to find a match from the bookings file
-        for idx, val in enumerate(my_list):
-            col_name = val
-            if col_name == sheet.cell_value(0, renewals_col_num):
-                # print('match',col_name, renewals_col_num)
-                my_list[idx] = (col_name,renewals_col_num)
+        for idx, col_name in enumerate(my_list):
+            if col_name == sheet.cell_value(0, sheet_col_num):
+                my_list[idx] = (col_name, sheet_col_num)
 
     # [('End Customer', 0), ('Renewal Date', 4), ('Monthly Charge', 9)]
 
@@ -45,3 +42,4 @@ if __name__ == "__main__":
     wb_renewals, sheet_renewals = open_wb(app['XLS_RENEWALS'])
     renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
     print(renewals_dict)
+    print(len(renewals_dict))
