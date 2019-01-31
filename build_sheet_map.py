@@ -1,6 +1,4 @@
-from settings import app
 from open_wb import open_wb
-# from sheet_map import sheet_map
 from Ssheet_class import Ssheet
 
 

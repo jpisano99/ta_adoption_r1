@@ -26,7 +26,7 @@ wb_bookings, sheet_bookings = open_wb(app['XLS_BOOKINGS'])
 
 # From the renewals file get renewal dates for lookup
 # {erp_customer_name:[renewal_date,monthly_charge]}
-renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
+# renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
 
 # From the current up to date bookings file build a simple dict
 # that describes the format of the output file we are creating
@@ -69,6 +69,10 @@ for idx, val in enumerate(sheet_map):
         prod_type_col_num = idx
     elif src_col_name == 'Sensor Count':
         sensor_cnt_col_num = idx
+    elif src_col_name == 'Renewal Date':
+        renew_date_col_num = idx
+    elif src_col_name == 'Product Bookings':
+        renew_rev_col_num = idx
 
 order_rows.append(order_top_row)
 print(order_rows)
@@ -129,16 +133,20 @@ for i in range(sheet_bookings.nrows):
                 # Add in the Sensor Count
                 order_row.append(sku_sensor_cnt)
             elif col_name == 'Product Bookings':
-                order_row.append('renew_revenue')
+                # if customer in renewals_dict:
+                #     renewal_rev = renewals_dict[customer]
+                #     order_row.append(renewal_rev[0][1])
+                pass
             elif col_name == 'Renewal Date':
-                order_row.append('renew_date')
+                # order_row.append('renew_date')
                 # Add in the Renewal Date if there is one
                 # Else just add a blank string
                 # if customer in renewals_dict:
                 #     renewal_date = renewals_dict[customer]
-                #     order_row.append(renewal_date[0])
+                #     order_row.append(renewal_date[0][0])
                 # else:
                 #     order_row.append('')
+                pass
             else:
                 # this cell is assigned a -1 in the bookings_dict
                 # so assign a blank as a placeholder for now

@@ -1,15 +1,16 @@
 import datetime
 import xlrd
-from open_wb import open_wb
-from sheet_map import sheet_map
 from settings import app
+from sheet_map import sheet_map
 from build_sheet_map import build_sheet_map
+import copy
 
 
 def build_renewals_dict(wb, sheet):
     # Return a dict (my_dict) with bookings file info
+    my_map = copy.deepcopy(sheet_map) # We need to create a UNIQUE copy of sheet_map
     my_dict = {}
-    my_map = build_sheet_map(app['XLS_RENEWALS'], sheet_map, 'XLS_RENEWALS')
+    my_map = build_sheet_map(app['XLS_RENEWALS'], my_map, 'XLS_RENEWALS')
 
     # Strip out all other un-needed tags from the sheet_map
     tmp_list = []
@@ -71,6 +72,7 @@ def build_renewals_dict(wb, sheet):
 
 
 if __name__ == "__main__":
+    from open_wb import open_wb
     wb_renewals, sheet_renewals = open_wb(app['XLS_RENEWALS'])
     renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
-    print('jim', renewals_dict)
+    print(renewals_dict)
