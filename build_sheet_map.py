@@ -1,6 +1,6 @@
 from settings import app
 from open_wb import open_wb
-from sheet_map import sheet_map
+# from sheet_map import sheet_map
 from Ssheet_class import Ssheet
 
 
@@ -40,12 +40,12 @@ def build_sheet_map(file_name, my_map, tag):
     return my_map
 
 
-if __name__ == "__main__":
-    # Populate the sheet map with column meta data
-    sheet_map = build_sheet_map(app['XLS_BOOKINGS'], sheet_map, 'XLS_BOOKINGS')
-    sheet_map = build_sheet_map(app['XLS_RENEWALS'], sheet_map, 'XLS_RENEWALS')
-    sheet_map = build_sheet_map(app['SS_COVERAGE'], sheet_map, 'SS_COVERAGE')
-    sheet_map = build_sheet_map(app['SS_AS'], sheet_map, 'SS_AS')
-    sheet_map = build_sheet_map(app['SS_CX'], sheet_map, 'SS_CX')
-    sheet_map = build_sheet_map(app['SS_SAAS'], sheet_map, 'SS_SAAS')
-    print(sheet_map)
+# if __name__ == "__main__":
+#     # Populate the sheet map with column meta data
+#     sheet_map = build_sheet_map(app['XLS_BOOKINGS'], sheet_map, 'XLS_BOOKINGS')
+#     sheet_map = build_sheet_map(app['XLS_RENEWALS'], sheet_map, 'XLS_RENEWALS')
+#     sheet_map = build_sheet_map(app['SS_COVERAGE'], sheet_map, 'SS_COVERAGE')
+#     sheet_map = build_sheet_map(app['SS_AS'], sheet_map, 'SS_AS')
+#     sheet_map = build_sheet_map(app['SS_CX'], sheet_map, 'SS_CX')
+#     sheet_map = build_sheet_map(app['SS_SAAS'], sheet_map, 'SS_SAAS')
+#     print(sheet_map)

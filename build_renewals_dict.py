@@ -1,9 +1,9 @@
 import datetime
 import xlrd
 from open_wb import open_wb
-from build_sheet_map import build_sheet_map
 from sheet_map import sheet_map
 from settings import app
+from build_sheet_map import build_sheet_map
 
 
 def build_renewals_dict(wb, sheet):
@@ -73,4 +73,4 @@ def build_renewals_dict(wb, sheet):
 if __name__ == "__main__":
     wb_renewals, sheet_renewals = open_wb(app['XLS_RENEWALS'])
     renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
-    print(renewals_dict)
+    print('jim', renewals_dict)

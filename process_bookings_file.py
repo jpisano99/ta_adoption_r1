@@ -128,14 +128,17 @@ for i in range(sheet_bookings.nrows):
             elif col_name == 'Sensor Count':
                 # Add in the Sensor Count
                 order_row.append(sku_sensor_cnt)
+            elif col_name == 'Product Bookings':
+                order_row.append('renew_revenue')
             elif col_name == 'Renewal Date':
+                order_row.append('renew_date')
                 # Add in the Renewal Date if there is one
                 # Else just add a blank string
-                if customer in renewals_dict:
-                    renewal_date = renewals_dict[customer]
-                    order_row.append(renewal_date[0])
-                else:
-                    order_row.append('')
+                # if customer in renewals_dict:
+                #     renewal_date = renewals_dict[customer]
+                #     order_row.append(renewal_date[0])
+                # else:
+                #     order_row.append('')
             else:
                 # this cell is assigned a -1 in the bookings_dict
                 # so assign a blank as a placeholder for now
