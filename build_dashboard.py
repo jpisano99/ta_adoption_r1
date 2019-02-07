@@ -5,14 +5,14 @@ from create_customer_order_dict import create_customer_order_dict
 from get_linked_sheet_update import get_linked_sheet_update
 from build_sheet_map import build_sheet_map
 from sheet_map import sheet_map, sheet_keys
-# from push_xls_to_ss import push_xls_to_ss
+from push_xls_to_ss import push_xls_to_ss
 
 
 if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_01_31_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_07_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers
@@ -23,9 +23,9 @@ if __name__ == "__main__":
     # Create a dict of customer orders
     customer_order_dict = create_customer_order_dict(order_list)
     print()
-    print('We have: ', len(customer_order_dict), ' customers')
-    print('with ', len(order_list), ' skus')
-
+    print('We have summarized ', len(order_list), ' of interesting line items into')
+    print(len(customer_order_dict), ' unique customers')
+    print()
     # Build Sheet Maps
     sheet_map = build_sheet_map(app['SS_CX'], sheet_map, 'SS_CX')
     sheet_map = build_sheet_map(app['SS_AS'], sheet_map, 'SS_AS')
@@ -95,6 +95,10 @@ if __name__ == "__main__":
         #
         if customer in saas_dict:
             saas_status = saas_dict[customer][0]
+            if saas_status is True:
+                saas_status = 'Provision Complete'
+            else:
+                saas_status = 'Provision NOT Complete'
         else:
             saas_status = 'No Status'
 
@@ -194,4 +198,5 @@ if __name__ == "__main__":
     # Write the Dashboard to an Excel File
     #
     push_list_to_xls(new_rows, app['XLS_DASHBOARD'])
+    # push_xls_to_ss(app['XLS_DASHBOARD']+'_as_of_01_31_2019.xlsx', 'jims dash')
     exit()

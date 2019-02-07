@@ -26,7 +26,7 @@ wb_bookings, sheet_bookings = open_wb(app['XLS_BOOKINGS'])
 
 # From the renewals file get renewal dates for lookup
 # {erp_customer_name:[renewal_date,monthly_charge]}
-# renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
+renewals_dict = build_renewals_dict(wb_renewals, sheet_renewals)
 
 # From the current up to date bookings file build a simple dict
 # that describes the format of the output file we are creating
@@ -47,6 +47,7 @@ customer_col_num = -1
 sku_col_num = -1
 pss_col_num = -1
 tsa_col_num = -1
+my_col_idx = {}
 
 # Build the column titles top row
 # Also grab
@@ -56,6 +57,9 @@ for idx, val in enumerate(sheet_map):
     src_col_name = val[0]  # Source Sheet Column Name
     src_col_num = val[2]  # Source sheet column number
     order_top_row.append(src_col_name)
+
+    # Add to the col_num dict of col_names
+    my_col_idx[val[0]] = idx
 
     if src_col_name == 'ERP End Customer Name':
         customer_col_num = src_col_num
@@ -75,8 +79,8 @@ for idx, val in enumerate(sheet_map):
         renew_rev_col_num = idx
 
 order_rows.append(order_top_row)
-print(order_rows)
 
+print('There are ', sheet_bookings.nrows, ' rows in Raw Bookings')
 #
 # Main loop of bookings excel data
 #
@@ -133,20 +137,27 @@ for i in range(sheet_bookings.nrows):
                 # Add in the Sensor Count
                 order_row.append(sku_sensor_cnt)
             elif col_name == 'Product Bookings':
-                # if customer in renewals_dict:
-                #     renewal_rev = renewals_dict[customer]
-                #     order_row.append(renewal_rev[0][1])
-                pass
+                if customer in renewals_dict:
+                    # print(renewals_dict[customer][0][1])
+                    # exit()
+                    renew_list = []
+                    renewal_recs = renewals_dict[customer]
+                    for renew_rec in renewal_recs:
+                            renew_list.append(round(renew_rec[1], 2))
+                    order_row.append(str(renew_list))
+                else:
+                    order_row.append(0)
             elif col_name == 'Renewal Date':
-                # order_row.append('renew_date')
                 # Add in the Renewal Date if there is one
                 # Else just add a blank string
-                # if customer in renewals_dict:
-                #     renewal_date = renewals_dict[customer]
-                #     order_row.append(renewal_date[0][0])
-                # else:
-                #     order_row.append('')
-                pass
+                if customer in renewals_dict:
+                    renew_list = []
+                    renewal_recs = renewals_dict[customer]
+                    for renew_rec in renewal_recs:
+                            renew_list.append(renew_rec[0])
+                    order_row.append(str(renew_list))
+                else:
+                    order_row.append('')
             else:
                 # this cell is assigned a -1 in the bookings_dict
                 # so assign a blank as a placeholder for now
@@ -157,7 +168,7 @@ for i in range(sheet_bookings.nrows):
         # Go to next row of the raw bookings data
         order_rows.append(order_row)
 
-print('len ', len(order_rows))
+print('Extracted ', len(order_rows), " rows of interesting SKU's' from Raw Bookings")
 #
 # End of main loop
 #
@@ -191,7 +202,7 @@ for idx, order_row in enumerate(order_rows):
 # Contains a full set of unique sorted customer names
 # Example: customer_list = [[erp_customer_name,end_customer_ultimate], [CustA,CustA]]
 customer_list = build_customer_list()
-print('customers ', len(customer_list))
+print('There are ', len(customer_list), ' unique Customer Names')
 
 # Clean up order_dict to remove:
 # 1.  +/- zero sum orders
@@ -205,7 +216,7 @@ summary_order_rows = [order_top_row]
 for key, val in order_dict.items():
     for my_row in val:
         summary_order_rows.append(my_row)
-print('summary len ', len(summary_order_rows))
+print(len(summary_order_rows), ' of Scrubbed line items after removing "noise"')
 
 #
 # Push our lists to an excel file

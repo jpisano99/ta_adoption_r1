@@ -4,6 +4,7 @@ from settings import app
 from sheet_map import sheet_map
 from build_sheet_map import build_sheet_map
 import copy
+import time
 
 
 def build_renewals_dict(wb, sheet):
@@ -13,13 +14,20 @@ def build_renewals_dict(wb, sheet):
     my_map = build_sheet_map(app['XLS_RENEWALS'], my_map, 'XLS_RENEWALS')
 
     # Strip out all other un-needed tags from the sheet_map
-    tmp_list = []
-    for idx, x in enumerate(my_map):
-        if x[1] == 'XLS_RENEWALS':
-            tmp_list.append(my_map[idx])
-    my_map = tmp_list
+    # tmp_list = []
+    # for idx, x in enumerate(my_map):
+    #     if x[1] == 'XLS_RENEWALS':
+    #         tmp_list.append(my_map[idx])
+    # # my_map = tmp_list
+    # print (tmp_list)
+
+    # List comprehension replacement for above
+    my_map = [x for x in my_map if x[1] == 'XLS_RENEWALS']
 
     # Loop over all of the renewal records
+    # Build a dict of {customer:[next renewal date, next renewal revenue, upcoming renewals]}
+
+
     for row_num in range(1, sheet.nrows):
         customer = sheet.cell_value(row_num, 0)
         if customer in my_dict:
@@ -44,7 +52,10 @@ def build_renewals_dict(wb, sheet):
         tmp_records.append(tmp_record)
         my_dict[customer] = tmp_records
 
-    #
+    # for customer, renewals in my_dict.items():
+    #     print (customer,renewals)
+    #     time.sleep(2)
+    # #
     # Here we compress and summarize the dict
     #
     for customer, renewals in my_dict.items():
