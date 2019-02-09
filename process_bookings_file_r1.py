@@ -173,7 +173,7 @@ print('There are ', len(customer_list), ' unique Customer Names')
 # Clean up order_dict to remove:
 # 1.  +/- zero sum orders
 # 2. zero revenue orders
-order_dict = cleanup_orders(customer_list, order_dict, sheet_map)
+order_dict, customer_platforms = cleanup_orders(customer_list, order_dict, sheet_map)
 
 #
 # Create a summary order file out of the order_dict
@@ -187,6 +187,7 @@ print(len(summary_order_rows), ' of scrubbed rows after removing "noise"')
 #
 # Push our lists to an excel file
 #
+push_list_to_xls(customer_platforms, 'jim')
 push_list_to_xls(summary_order_rows, app['XLS_ORDER_SUMMARY'])
 push_list_to_xls(order_rows, app['XLS_ORDER_DETAIL'])
 push_list_to_xls(customer_list, app['XLS_CUSTOMER'])

@@ -45,7 +45,7 @@ if __name__ == "__main__":
     print('We have SAAS Updates: ', len(saas_dict))
     print()
 
-    # Create Platform dict for lookup
+    # Create Platform dict for platform lookup
     tmp_dict = build_sku_dict()
     platform_dict = {}
     for key, val in tmp_dict.items():
@@ -139,6 +139,7 @@ if __name__ == "__main__":
         # Total things
         # Build a list of things that may change order to order (ie Renewal Dates, Customer Names)
         #
+        platform_count = 0
         for order_idx, order in enumerate(orders):
             # calculate totals in this loop (ie total_books, sensor count etc)
             bookings_total = bookings_total + order[my_col_idx['Total Bookings']]
@@ -148,7 +149,10 @@ if __name__ == "__main__":
                 service_bookings = service_bookings + order[my_col_idx['Total Bookings']]
 
             if order[my_col_idx['Bundle Product ID']] in platform_dict:
+                platform_count += 1
                 platform_type = platform_dict[order[my_col_idx['Bundle Product ID']]]
+                if platform_count > 1:
+                    platform_type = platform_type + ' plus ' + str(platform_count-1)
 
         #
         # Modify/Update this record as needed and then add to the new_rows

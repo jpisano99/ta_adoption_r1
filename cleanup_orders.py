@@ -1,6 +1,8 @@
+from build_sku_dict import build_sku_dict
+import time
+
 
 def cleanup_orders(customer_list, order_dict, col_map):
-
     sku_col_num = -1
     booking_col_num = -1
     for idx, val in enumerate(col_map):
@@ -9,10 +11,16 @@ def cleanup_orders(customer_list, order_dict, col_map):
         if val[0] == 'Total Bookings':
             booking_col_num = idx
 
+    # Create Platform dict for platform lookup
+    tmp_dict = build_sku_dict()
+    platform_dict = {}
+    for key, val in tmp_dict.items():
+        if val[0] == 'Product' or val[0] == 'SaaS':
+            platform_dict[key] = val[1]
+
     # Loop over each customer and see if they have any orders
-    for idx, customer_names in enumerate(customer_list):
-        if idx == 0:
-            continue  # skip the heard row
+    customer_platforms = []
+    for customer_names in customer_list[1:]:  # skip the heard row
         customer_name = customer_names[0]  # (erp_customer_name,end_customer_ult)
 
         # If this customer has orders then
@@ -20,11 +28,16 @@ def cleanup_orders(customer_list, order_dict, col_map):
         if customer_name in order_dict:
             dirty_orders = order_dict[customer_name]
             clean_orders = []
+            platform_found = False
 
             for idx, order in enumerate(dirty_orders):
                 sku = order[sku_col_num]
                 booking = order[booking_col_num]
                 valid_order = False
+
+                if sku in platform_dict:
+                    platform_found = True
+                    customer_platforms.append([customer_name, sku, booking])
 
                 if booking == 0:
                     # Drop this order
@@ -47,9 +60,12 @@ def cleanup_orders(customer_list, order_dict, col_map):
                 if valid_order:
                     clean_orders.append(order)
 
+            if platform_found is False:
+                customer_platforms.append([customer_name, 'None found', 0])
+
             order_dict[customer_name] = clean_orders
 
-    return order_dict
+    return order_dict, customer_platforms
 
 
 # Execute `main()` function
