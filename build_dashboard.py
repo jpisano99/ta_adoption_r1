@@ -5,6 +5,7 @@ from create_customer_order_dict import create_customer_order_dict
 from get_linked_sheet_update import get_linked_sheet_update
 from build_sheet_map import build_sheet_map
 from sheet_map import sheet_map, sheet_keys
+from build_sku_dict import build_sku_dict
 from push_xls_to_ss import push_xls_to_ss
 
 
@@ -12,7 +13,7 @@ if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_07_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_09_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers
@@ -45,9 +46,11 @@ if __name__ == "__main__":
     print()
 
     # Create Platform dict for lookup
-    platform_dict = {'TA-CL-G1-39-K9': '39RU', 'TA-CL-G1-SFF8-K9': '8RU',
-                     'C1-TA-V-SW-K9': 'Sftw Only', 'C1-TAAS-WP-FND-K9': 'SAAS',
-                     'E2C1-TAAS-WPFND': 'SAAS'}
+    tmp_dict = build_sku_dict()
+    platform_dict = {}
+    for key, val in tmp_dict.items():
+        if val[0] == 'Product' or val[0] == 'SaaS':
+            platform_dict[key] = val[1]
 
     #
     # Init Main Loop Variables
@@ -146,8 +149,6 @@ if __name__ == "__main__":
 
             if order[my_col_idx['Bundle Product ID']] in platform_dict:
                 platform_type = platform_dict[order[my_col_idx['Bundle Product ID']]]
-            else:
-                platform_type = 'Unknown'
 
         #
         # Modify/Update this record as needed and then add to the new_rows

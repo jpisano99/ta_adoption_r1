@@ -61,6 +61,18 @@ def build_renewals_dict(wb, sheet):
     for customer, renewals in my_dict.items():
         renewal_dates = {}
 
+        # Sort this customer renewal dates
+        renewals.sort(key=lambda x: x[0])
+        # if customer == 'FIRST NATIONAL BANK OF SOUTHERN AFRICA LTD':
+        #     print(customer)
+        #     print()
+        #     print(len(renewals))
+        #     print(renewals)
+        #     # renewals.sort(key=lambda x: x[0])
+        #     print(len(renewals))
+        #     print(renewals)
+        #     # exit()
+
         for renewal in renewals:
             renewal_date = renewal[0]
             renewal_revenue = renewal[1]
@@ -79,6 +91,9 @@ def build_renewals_dict(wb, sheet):
             tmp_list.append([tmp_date, tmp_revenue])
         my_dict[customer] = tmp_list
 
+        # if customer == 'FIRST NATIONAL BANK OF SOUTHERN AFRICA LTD':
+        #     print(my_dict[customer])
+        #     exit()
     return my_dict
 
 
