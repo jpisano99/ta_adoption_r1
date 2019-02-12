@@ -170,6 +170,10 @@ for idx, order_row in enumerate(order_rows):
 customer_list = build_customer_list()
 print('There are ', len(customer_list), ' unique Customer Names')
 
+#
+# Renewal Analysis
+#
+
 # Clean up order_dict to remove:
 # 1.  +/- zero sum orders
 # 2. zero revenue orders
