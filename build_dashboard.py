@@ -13,7 +13,7 @@ if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_09_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_10_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers

@@ -20,7 +20,7 @@ def cleanup_orders(customer_list, order_dict, col_map):
 
     # Loop over each customer and see if they have any orders
     customer_platforms = []
-    for customer_names in customer_list[1:]:  # skip the heard row
+    for customer_names in customer_list[1:]:  # skip the head row
         customer_name = customer_names[0]  # (erp_customer_name,end_customer_ult)
 
         # If this customer has orders then
