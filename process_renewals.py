@@ -14,7 +14,7 @@ def process_renewals(customer_list, order_dict):
     wb, sheet = open_wb(app['XLS_RENEWALS'])
 
     # Build a dict out of the renewals sheet
-    build_renewals_dict(wb, sheet)
+    my_dict = build_renewals_dict(wb, sheet)
 
     # # Return a dict (my_dict) with bookings file info
     # my_map = copy.deepcopy(sheet_map) # We need to create a UNIQUE copy of sheet_map
