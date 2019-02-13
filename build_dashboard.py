@@ -1,4 +1,6 @@
 from settings import app
+import datetime
+import xlrd
 from open_wb import open_wb
 from push_list_to_xls import push_list_to_xls
 from create_customer_order_dict import create_customer_order_dict
@@ -13,13 +15,21 @@ if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_12_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_13_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers
     order_list = []
-    for i in range(1, sheet_orders.nrows):  # Skip the header row start at 1
-        order_list.append(sheet_orders.row_values(i))
+    for row_num in range(1, sheet_orders.nrows):  # Skip the header row start at 1
+        tmp_record = []
+        for col_num in range(sheet_orders.ncols):
+            my_cell = sheet_orders.cell_value(row_num, col_num)
+
+            # If we just read a date save it as a datetime
+            if sheet_orders.cell_type(row_num, col_num) == 3:
+                my_cell = datetime.datetime(*xlrd.xldate_as_tuple(my_cell, wb_orders.datemode))
+            tmp_record.append(my_cell)
+        order_list.append(tmp_record)
 
     # Create a dict of customer orders
     customer_order_dict = create_customer_order_dict(order_list)

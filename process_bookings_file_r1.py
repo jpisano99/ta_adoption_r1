@@ -1,4 +1,5 @@
 from settings import app
+import datetime
 from build_customer_list import build_customer_list
 from open_wb import open_wb
 from sheet_map import sheet_map
@@ -8,6 +9,7 @@ from build_sheet_map import build_sheet_map
 from build_renewals_dict import build_renewals_dict
 from cleanup_orders import cleanup_orders
 from find_team import find_team
+from process_renewals import process_renewals
 from push_list_to_xls import push_list_to_xls
 from push_xls_to_ss import push_xls_to_ss
 import time
@@ -142,6 +144,33 @@ print('Trashed ', len(trash_rows), " rows of trash SKU's' from Raw Bookings")
 # End of main loop
 #
 
+#
+# Renewal Analysis
+#
+renewal_dict = process_renewals()
+for order_row in order_rows[1:]:
+    customer = order_row[dest_col_nums['ERP End Customer Name']]
+    if customer in renewal_dict:
+        next_renewal_date = datetime.datetime.strptime(renewal_dict[customer][0][0], '%m-%d-%Y')
+        next_renewal_rev = renewal_dict[customer][0][1]
+        next_renewal_qtr = renewal_dict[customer][0][2]
+
+        order_row[dest_col_nums['Renewal Date']] = next_renewal_date
+        order_row[dest_col_nums['Product Bookings']] = next_renewal_rev
+        order_row[dest_col_nums['Fiscal Quarter ID']] = next_renewal_qtr
+
+        if len(renewal_dict[customer]) > 1:
+            renewal_comments = '+' + str(len(renewal_dict[customer])-1) + ' more renewal(s)'
+            order_row[dest_col_nums['Renewal Comments']] = renewal_comments
+
+#
+#
+# print(dest_col_nums['Renewal Date'])
+# print(dest_col_nums['Product Bookings'])
+# print(dest_col_nums['Fiscal Quarter ID'])
+# print(dest_col_nums['Renewal Comments'])
+# exit()
+
 # Now we build a an order dict
 # Let's organize as this
 # order_dict: {cust_name:[[order1],[order2],[orderN]]}
@@ -170,9 +199,6 @@ for idx, order_row in enumerate(order_rows):
 customer_list = build_customer_list()
 print('There are ', len(customer_list), ' unique Customer Names')
 
-#
-# Renewal Analysis
-#
 
 # Clean up order_dict to remove:
 # 1.  +/- zero sum orders
