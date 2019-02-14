@@ -18,6 +18,14 @@ def push_list_to_xls(my_list, xls_file):
     workbook = xlsxwriter.Workbook(wb_file)
     worksheet = workbook.add_worksheet()
 
+    cell_format = workbook.add_format()
+    cell_format.set_bold()
+    cell_format.set_bg_color('#B7FFF9')
+
+    cell_format.set_bg_color('#B7D9FF')
+    cell_format.set_bg_color('#FFFEB7')
+    # cell_format.set_font_color('red')
+
     xls_money = workbook.add_format({'num_format': '$#,##0'})
     xls_date = workbook.add_format({'num_format': 'mm / dd/ yyyy'})
 
@@ -28,14 +36,8 @@ def push_list_to_xls(my_list, xls_file):
             elif isinstance(cell_val, datetime.datetime):
                 worksheet.write(row_num, col_num, cell_val, xls_date)
             else:
-                worksheet.write(row_num, col_num, cell_val)
+                worksheet.write(row_num, col_num, cell_val, cell_format)
 
     workbook.close()
-
-
-
-    # for this_row, my_val in enumerate(my_list):
-    #     worksheet.write_row(this_row, 0, my_val)
-    # workbook.close()
 
     return

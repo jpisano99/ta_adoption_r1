@@ -58,8 +58,10 @@ def ss_get_template(ss, template_name):
 def ss_get_col_data(ss, sheet_id):
     # Get column data from sheet_id
     tmp = ss.Sheets.get_sheet(sheet_id, include='rowIds')
+    # tmp = ss.Sheets.get_sheet(sheet_id, include='format')
     sheet_dict = tmp.to_dict()
     columns = sheet_dict.get('columns', {})
+    # print(json.dumps(tmp.to_dict(), indent=2))
     return columns
 
 
