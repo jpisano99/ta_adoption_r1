@@ -6,7 +6,6 @@ from sheet_map import sheet_map
 from build_coverage_dict import build_coverage_dict
 from build_sku_dict import build_sku_dict
 from build_sheet_map import build_sheet_map
-from build_renewals_dict import build_renewals_dict
 from cleanup_orders import cleanup_orders
 from find_team import find_team
 from process_renewals import process_renewals

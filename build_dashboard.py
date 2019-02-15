@@ -15,7 +15,7 @@ if __name__ == "__main__":
     #
     # Open the order summary
     #
-    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_13_2019.xlsx')
+    wb_orders, sheet_orders = open_wb('tmp_TA Scrubbed Orders_as_of_02_15_2019.xlsx')
 
     # Loop over the orders XLS worksheet
     # Create a simple list of orders with NO headers
@@ -129,16 +129,21 @@ if __name__ == "__main__":
                 as_pm = as_dict[customer][0]
 
             if as_dict[customer][1] == '':
-                as_cse = 'None Assigned'
+                as_cse1 = 'None Assigned'
             else:
-                as_cse = as_dict[customer][1]
+                as_cse1 = as_dict[customer][1]
 
             if as_dict[customer][2] == '':
+                as_cse2 = 'None Assigned'
+            else:
+                as_cse2 = as_dict[customer][2]
+
+            if as_dict[customer][3] == '':
                 as_complete = 'No Update'
             else:
                 as_complete = as_dict[customer][2]
 
-            if as_dict[customer][3] == '':
+            if as_dict[customer][4] == '':
                 as_comments = 'No Comments'
             else:
                 as_comments = as_dict[customer][3]
@@ -174,8 +179,9 @@ if __name__ == "__main__":
         order[my_col_idx['CuSM Name']] = cx_contact
         order[my_col_idx['Next Action']] = cx_status
 
-        order[my_col_idx['AS PM']] = as_pm
-        order[my_col_idx['AS CSE']] = as_cse
+        order[my_col_idx['Project Manager']] = as_pm
+        order[my_col_idx['AS Engineer 1']] = as_cse1
+        order[my_col_idx['AS Engineer 2']] = as_cse2
         order[my_col_idx['Project Status/PM Completion']] = as_complete
         order[my_col_idx['Delivery Comments']] = as_comments
 
